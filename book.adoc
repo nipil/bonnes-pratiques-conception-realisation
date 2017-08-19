@@ -1,0 +1,168 @@
+= Bonnes pratiques pour la conception et la réalisation
+:doctype: book
+:toc: left
+:toclevels: 3
+:sectnums:
+:sectnumlevels: 10
+
+[abstract]
+====
+Ce document a été réalisé dans le cadre spécifique d'un projet existant et des technologiques qu'il emploie, mais les préceptes qu'il présente restent pertinents ou adaptables à l'ensemble des applications informatiques quelles que soient les technologies utilisées
+====
+
+include::intro.adoc[]
+
+include::validation.adoc[]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+= Comportement indéfini
+
+"Tracer et remonter les comportements non-définis"
+
+L'application gère tous les cas possibles, même si tous ne sont pas utiles ou spécifiés.
+
+Il est important :
+
+- d'identifier les cas "non définis"
+- de logger chaque fois que l'on entre dans un de ces cas
+- de remonter des exceptions type "Not yet specified" afin de remonter l'information
+
+Exemple: si une spécification référence un entier de 1 à 3, tout autre valeur doit logger l'occurence et remonter une exception
+
+= Lexique
+
+maintenir la cohérence entre comportement et sémantique
+
+Exemple: si un script redémarre (restart) un daemon, ne pas l'appeler reload (qui recharger habituellement la configuration sans redémarrer)
+
+= Intégrité et atomicité des opérations
+
+Principe : "Donner exactement le résultat attendu, ou annuler l'ensemble et remonter le problème"
+
+Consigne :
+
+- toute erreur fonctionnelle particulière doit annuler l'opération fonctionnelle globale
+- toute erreur technique doit annuler l'opération fonctionnelle en cours
+- toute erreur technique particulière doit annuler l'opération technique globale
+- si une opération est annulée durant son exécution, l'ensemble du travail réalisé doit l'être aussi
+
+Exemple: arrêt gracieux des moteurs entre 2 itérations
+
+= Données et métadonnées
+
+"Les données doivent être complètement définies"
+
+- forme vs fond : un fichier xml devra faire référence à son DTD ou son schémas XSD, afin qu'aucune information extérieure additionnelle ne soit nécessaire pour valider le fragment xml
+
+- il n'existe rien de tel qu'une "simple chaine de caractère" : tout caractère est forcément, obligatoirement associé (que ça soit implicite ou explicite) à un encodage. Pour chaque élément textuel, il est nécessaire de connaître/définir/contrôler l'encodage utilisé, afin de permettre un transcodage, un stockage, une transmission et un affichage cohérent
+
+- les données temporelles sont forcément associées avec une timezone, qu'elle soit implicite ou explicite. En conséquence, pour chaque date/heure, la timezone utilisée est nécessaire afin de garantir la cohérence temporelle, de gérer les changements d'heure, d'avoir des calculs temporels justes, et de pouvoir transmettre cette information aux consommateurs lors des sorties
+
+Consigne :
+
+- déterminer l'encodage utilisé pour chaque texte entrant
+- définir explicitement la timezone de chaque date/heure entrée
+- convertir chacune selon les besoins
+- de fournir l'information de timezone lors des sorties (affichages, fichiers, webservices)
+- il doit être possible de tracer de bout en bout la valeur des paramètres
+- il faut garantir la cohérence des données entre les modules, applications, et middleware
+
+= Evolution des données
+
+schémas global:
+- migration à froid (arret migration relance) : une version avant, une autre après
+- migration à chaud : une version avant, deux après, conversion à la volée, obsolèscence et retrait de l'ancienne version
+- versionning des schémas de données : migration explicite
+- versionning des structures de données dans le code : pour validation et cohérence avec le schémas de donnée
+
+= sécurité
+
+- toujours utiliser des requêtes paramétrées pour intégrer les valeurs dans les requêtes sql, pour éviter les problèmes d'échapement et se protéger des injections sql
+
+- toujours faire une passe d'encodage des entités (html, url) avant d'insérer du contenu dynamique dans une page html ou similaire, pour éviter les erreurs de parsing, et se protéger des attaques XSS (cross site scripting)
+
+- aucune donnée sensible ne doit passer en clair (identifiants, mots de passe) : il faut utiliser un transport sécurisé (https). A défaut, utiliser une méthode d'authentification par challenge : le serveur génère un challenge, le client saisit son mot de passe et l'outil utilise celui-ci pour transformer le challenge, puis renvoie le challenge modifé au serveur ; le serveur, connaissant le mot de passe et ayant mémorisé le challenge fourni, effectue la même opération. Si le résultat concorde, ça veut dire que l'utilisateur disposait du même mot de passe que celui stocké par le serveur.
+
+- aucune donnée sensible ne doit être stockée en clair : les mots de passe doivent être combinés à un "salt" (une chaine aléatoire généré à chaque définition de mot de passe) puis l'ensemble est hashé. On stocke l'algorithme de hash utilisé, le salt, et le hash résultant de l'opération. Lors de la vérification, on refait le calcul en utilisant l'entrée utilisateur, la même fonction de hash et le même salt, et on compare le résultat avec le résultat stocké.
+
+- si des contrôles sont fait côté utilisateur (javascript et autres) afin d'aider à la saisie, il ne sont qu'utilitaires : il faut toujours refaire les mêmes contrôles (cf validation des entrées) dans le back-end côté serveur, car les vérifications côté clients peuvent être facilement contournées
+
+
+= base de données
+
+tout accès à une base doit faire l'objet d'une transaction
+toute transaction non explicitement commitée doit faire l'objet d'un rollback implicite
+atomicité même pour les lectures
+forme normale + gestion clés externes évite structurellement les orphelins
+décorréler les id fonctionels du technique, key sur technique contraintes sur fonctionnel
+timestamps des modifs pour permettre de check les overwrites
+ajouter un maximum de contraintes permettant de valider les valeurs des données
+
+= portabilité
+
+aucun élément ne doit être hard-codé
+posix ou spécifique (si bash, alors bash)
+
+= scripts
+
+scope des variables
+surcharge éventuelle pour les éléments non paramétrables pour éviter les modification
+vérification des code de retour
+segmentation en commandes unitaires plutôt qu'en chaine
+factoriser le code en fonction
+factoriser le code en librairies
+
+= concurrence et parallèlisme
+
+lister tous les accès en écriture possibles sur chaque élément technique manipulé par le produit (fichier, données, session)
+si une concurrence est techniquement possible il est obligatoire de la gérer, au tout du moins de rejeter le cas
+partager les informations entre les différents éléments techniques travaillant ensembles (ex sessions php)
+
+chaque élément contrôle son environnement d'exécution : si un hy doit gérer N moteur, préférer un daemon master qui spawn N children, et qui contrôle qu'on a pas plus d'un child de chaque type lancé
+
+= vrac
+
+good software doest what is told, great software does only what it is supposed to + le nécessaire n'est pas suffisant
+purge avant déploiement
+contrôles sur les sorties (design by contract), but tester les overload et conversions auto int=>float
+KISS = si c'est compliqué à expliquer, c'est probablement une mauvaise idée
+version des données (xml format 1, xml format 2, csv format 1, csv format 2...)
+ne stocker que des références dans des cookies, pas la donnée
+unicité/non redondance de l'information
+tracabilité applicative != traçabilité technique (log tech vs log func)
+gestionnaire de dépendances (composer/npm)
+fragmentation des fichiers (app.js) => réutilisation
+async js (fail graciously)
+le bon outil => importprojet.php car sh=systeme, php=appli : transact over everything, stop on err
+la concurrence existe de fait et doit être gérée (IHM: mm single user, multitab ; script lancé plusieurs fois ; manual + batch)
+verifier type intermédiaires des variables de sortie
+set des params par ref juste avant de return, pour cancel plus facile en cas d'early return
+clean et reinstall auto complete from scratch
+prévoir des mécanismes d'override de livrables plutôt que de modifier les fichiers livrés
+commit souvent pour commit minimal
+vérification intégriste de chaque ligne de commit pour ne rien laisser passer (debug, commentaire, etc)
+construire id technique flexible, pas de regle de gestion non vérifiables (id conf != id restit => pb)
+si le pgm ne gère pas les locales, les outils qu'il utilisent peut le faire : figer la sortie en désactivant locale LC_ALL=C
+ssh batch mode pour interdire le prompt qui hang la connexion
+ssh pre-test connexion avant commande pour retour erreur
+ssh multi commande => 1 série de cmd plutôt qu'une série de ssh, préférer invoc un script distant copié à l'avance quand la logique devient complexe
+désactivation de l'application (aka all stop mm si middleware run) : cron + shells + ihm + ws

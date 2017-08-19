@@ -1,24 +1,106 @@
 = Validation systématique
 
-"Build defensive : never trust anything"
 
-== Une question de périmètre
+[quote]
+Un bon programme fait ce qu'on lui demande, un excellent programme refuse ce qu'il n'est pas sensé faire
 
-Les entrées
+== Périmètre
+
+Une application est segmentée en composants (techniques, fonctionnels, systèmes applicatifs, internes, externes...)
+
+[IMPORTANT]
+====
+Il faut identifier de manière *exaustive* et synthétique *chaque point d'entrée* et de sortie de *chaque composant*
+====
+
+Cette phase est vitale, car elle permet de construire l'inventaire des éléments à vérifier.
+
+== Vérification intégrale de chaque donnée entrée
+
+[quote]
+Never trust anything, build defensive
+
+Que ce soit pour par erreur, malveillance, ou oubli, n'importe quel élément peut recevoir des données différentes de celles attendues.
+
+[IMPORTANT]
+====
+Il faut vérifier *systématiquement* toute donnée entrante, de manière *exaustive* et *contraignante* afin d'être soit acceptée si conforme, ou rejetée si invalide.
+====
+
+== Quoi vérifier ?
+
+Tous les éléments sont concernées par cette vérification :
+
+* les programmes et les scripts
+* les IHM
+* les interfaces programmables (api, webservices)
+* les classes et fonctions
+* les variables accessibles dans le scope
+* ...
+
+[IMPORTANT]
+====
+Pour les *programmes* et les *scripts* : il faut vérifier les *arguments*, les *fichiers*, et l'*entrée standard*
+====
+
+[IMPORTANT]
+====
+Pour les *IHM* et les *API* : il faut vérifier *chaque élément soumis* : saisie utilisateurs, id d'objets, widget sélectionné, headers et cookie...
+====
+
+[IMPORTANT]
+====
+Pour le *code* : il faut vérifier *chaque arguments de chaque fonction*, les *variables accessibles dans le scope*, les *valeurs de sorties* (qu'elles soient retournées par valeur ou via un passage par référence)
+====
+
+== Que vérifier ?
+
+=== Disponibilité
+
+[IMPORTANT]
+====
+Il faut vérifier si les données sont *présentes ou absentes* (fichiers, arguments...) et *définies* ou *indéfinies* (variables)
+
+Il faut ensuite *accepter* ou *rejeter* chaque donnée en fonction de résultat et de leur caractère *obligatoire* ou *facultatives*
+====
+
+=== Structure
+
+[IMPORTANT]
+====
+Il faut valider la structure et vérifier que *la donnée est bien formée*
+
+Il faut utiliser des éléments *existants*, bien *testés*, et *maintenus* plutôt que de développer des solutions ad-hoc
+
+Par exemple, on utilisera xmllint et SAX/DOM pour XML, ou RFC 4180 et librairie pour CSV
+====
+
+Par exemple, *pour un fichier XML*, on vérifiera qu'il est parsable :
+
+* qu'il respecte de l'ordre des tags
+* que les inclusions sont fonctionnelles
+* que les entités sont utilisables
+
+Par exemple, *pour un fichier CSV*, on vérifiera :
+
+* que le caractère de séparation est celui attendu
+* que le nombre de champs est constants entre les records
+* que le header est présent ou absent selon ce qui est attendu
+* que l'échappement des caractères de séparation est bien fait
 
 
 
 
 
-Consigne : toute donnée entrante doit être *systématiquement* validée avant tout utilisation
 
-Quoi valider : absolument toutes les entrées. Chaque fichier, chaque paramètres de la ligne de commande, chaque saisie web, web-services...
 
-Quand : les données doivent être intégralement validées le plus tôt possible, afin de réduire au minimum leur pénétration dans le système.
 
-Que vérifier :
-- la disponibilité : données présentes ou absentes (fichiers), définies ou non définies (variables), obligatoires ou facultatives
-- la structure : validation de la structure (xml bien formé *et* valide, syntaxe json, respect du format csv)
+
+est ce que la donnée est du type
+
+
+
+
 - le type de chaque fragment de données : entier, flotant, booléen, chaîne de caractères
 - les valeurs : positif, nul, négatif, plage de valeurs, ensemble de valeurs, majuscule/minuscule, expression régulières
 

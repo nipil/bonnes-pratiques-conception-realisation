@@ -2,12 +2,12 @@
 
 == Croissance du savoir
 
-Le savoir humain s'est construit de génération en génération : on apprend un certain nombre de choses, on en découvre éventuellement de nouvelles,  et on transmet éventuellement ce savoir, afin d'alimenter les générations suivantes. Ceci est bien sûr valable quel que soit le domaine, y compris (et surtout !) l'informatique.
+Le savoir humain s'est construit de génération en génération : on apprend un certain nombre de choses, on en découvre éventuellement de nouvelles,  et on transmet éventuellement ce savoir, afin d'alimenter les générations suivantes. Ceci est bien sûr valable quel que soit le domaine, y compris l'informatique.
 
 Il y a deux facteurs limitants à cette dynamique de croissance du savoir :
 
 * la quantité de choses apprise : moins on apprend, plus on est voués à re-découvrir les choses déjà découvertes par d'autres, ce qui entraîne une perte de temps et d'énergie
-* la quantité de choses transmises : moins on transmet, plus le temps et l'énergie dévouée à ces découvertes est perdue pour la communauté, ce qui entraîne une perte de temps et d'énergie
+* la quantité de choses transmises : moins on transmet, plus le temps et l'énergie dévouée à ces découvertes est perdue pour la communauté
 
 == Pourquoi ce document ?
 
@@ -15,21 +15,23 @@ Au regard de la section ci-dessus, le présent document vise donc (dans la limit
 
 Nous rédigeons ce document en partant des principes suivants :
 
-* un ensemble de connaissances existent déjà et peuvent être transmises
-* une majorité de problèmes ont déjà découvert, étudiés et résolus
-* une mise en forme synthétique, brève et claire permet une transmission et une acquisition facilitée
+* un ensemble de connaissances existe déjà et peut être transmis
+* une majorité de problèmes ont déjà été découvert, étudiés et résolus
+* une mise en forme synthétique et groupée facilite la transmission et la prise en compte
 
 == Présentation du contenu
 
 Ce guide vise donc à présenter de manière organisée et synthétique, l'ensemble des problématiques à connaître, et à appliquer lors de la conception ou la réalisation d'un élément.
 
-Bien sûr, ces principes sont applicables indépendamment de l'ampleur, de la criticité, ou de la longévité de l'élement concerné.
+Bien sûr, ces principes sont *applicables quels que soient l'ampleur, la criticité, ou la longévité* de l'élement concerné.
 
-Ce document est organisés par thèmes, où l'on présente des *classes de problèmes*. Pour chacun, on présentera les points d'attention afférents, les solutions typiques permettant de les traiter de la *meilleure manière connue*, et les déclinaisons directes pour le projet en cours.
+Ce document est organisés par thèmes, où l'on présente des *classes de problèmes*.
 
-Le document restera cependant général : chaque point abordé sera expliqué, un exemple sera éventuellement donné, et des préceptes de mise en oeuvre de solution seront fournis. On pourra donc le comparer à une encyclopédie sur la cuisine, plutôt qu'un livre de recette.
+On présentera chacun, on soulèvera des points d'attention, et on présentera les solutions typiques permettant de les traiter de la *meilleure manière connue*.
 
-Chaque partie abordera un ensemble de problèmes, avec des sections dédiées à chaque point thématique relevant de cette classe de problèmes.
+Le document restera cependant général : chaque point abordé sera expliqué, un exemple sera éventuellement donné, et *des consignes de mise en oeuvre de solution seront fournis*. On pourra donc le comparer à une encyclopédie sur la cuisine, plutôt qu'un livre de recette.
+
+Chaque partie abordera un ensemble de problèmes, avec des sections dédiées et progressives pour le traitment de chaque point thématique relevant de cette classe de problèmes.
 
 == Évolution
 

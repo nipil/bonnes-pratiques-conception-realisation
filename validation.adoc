@@ -1,30 +1,74 @@
-= Validation systématique
-
+= Validation systématique des données
 
 [quote]
 Un bon programme fait ce qu'on lui demande, un excellent programme refuse ce qu'il n'est pas sensé faire
 
+La validation des données fait partie du paradigme "link:++https://en.wikipedia.org/wiki/Design_by_contract++[Design by contract]". Ce concept s'articule autour du fait que :
+
+* *un contrat "de fait" existe* entre chaque *producteur* et chaque *consommateur*
+* ce contrat peut être *documenté*, mais le fait de le documenter *ne garanti absolument pas* le respect du contrat
+* il est donc nécessaire de *s'assurer du respect* du contrat *à chacune des étapes de sa vie*
+
+A noter qu'un producteur peut être une simple fonction retournant une valeur, ou la partie génération d'un générateur de site web statique ; de même, un consommateur peut être une simple fonction prenant un paramètre, ou un navigateur web.
+
 == Périmètre
 
-Une application est segmentée en composants (techniques, fonctionnels, systèmes applicatifs, internes, externes...)
+Une application est segmentée en composants (techniques, fonctionnels, systèmes, applicatifs, internes, externes...)
 
 [IMPORTANT]
 ====
 Il faut identifier de manière *exaustive* et synthétique *chaque point d'entrée* et de sortie de *chaque composant*
 ====
 
-Cette phase est vitale, car elle permet de construire l'inventaire des éléments à vérifier.
+Cette phase est vitale, car elle permet de construire l'inventaire des éléments à vérifier, pour la phase de vérification qui suit.
 
-== Vérification intégrale de chaque donnée entrée
+== Vérification entrantes
 
 [quote]
-Never trust anything, build defensive
+Build defensive.
 
 Que ce soit pour par erreur, malveillance, ou oubli, n'importe quel élément peut recevoir des données différentes de celles attendues.
 
 [IMPORTANT]
 ====
 Il faut vérifier *systématiquement* toute donnée entrante, de manière *exaustive* et *contraignante* afin d'être soit acceptée si conforme, ou rejetée si invalide.
+====
+
+De cette manière, on s'assure que ce qu'on manipule correspond bien à ce qu'on pense manipuler, ce qui simplifie grandement la gestion d'erreur.
+
+[NOTE]
+====
+L'impact de validation sur les performances est sans intérêt, pour deux raisons :
+
+* d'une part, la *justesse* du résultat prime sur toute considération de performance
+* d'autre part, ce type de vérification n'est à effectuer qu'aux bordures de périmètres (et donc normalement *une seule fois par donnée entrée*)
+====
+
+Bien entendu, on factorisera le code de vérification dans une fonction/classe de vérification qu'on testera avec rigueur : on implémentera *un nombre conséquent de tests* permettant de valider le rejet d'un maximum de cas d'erreur (forme, débordement) car c'est surtout l'aspect rejet qui est important
+
+== Vérification sortantes
+
+[quote]
+Do not feed garbage
+
+Que ce soit par erreur, péremption, ou dû à un effet de bord d'une évolution ou d'une refactorisation, *la sortie d'un producteur* peut ne plus être en accord avec *l'entrée d'un consommateur*.
+
+[IMPORTANT]
+====
+Le producteur d'une sortie doit s'assurer de l'intégrité et de la cohérence de la sortie qu'il réalise pour tous ses consommateurs
+====
+
+Notamment :
+
+* il doit fournir des éléments bien formés et valides à ses consommateurs (_respect du contrat_)
+* il ne doit mettre/laisser à disposition que les éléments nécessaires aux seuls consommateurs souhaités (_purge_)
+* il doit informer les consommateurs de la mise à jour (ajout/modification/suppression) des éléments qu'il fournit afin qu'ils puissent se mettre à jour
+
+[NOTE]
+====
+Au regard de la section précédente, la question des sorties "bien formées et valides" ne devrait pas poser de problèmes, car le consommateur doit vérifier systématiquement toutes ses entrées.
+
+Cependant, que ça soit parce qu'on ne maîtrise pas les entités consommatrices, ou parce qu'en cas de consommateurs multiples, _seul le producteur peut assurer la cohérence de l'ensemble fourni aux consommateurs_ il est préférable de s'assurer de cet aspect pour éviter de devoir gérer côté producteur les rejets des données mal formées qu'il fournirait, vis à vis de l'action de l'ensemble des consommateurs.
 ====
 
 == Quoi vérifier ?
@@ -40,7 +84,7 @@ Tous les éléments sont concernées par cette vérification :
 
 [IMPORTANT]
 ====
-Pour les *programmes* et les *scripts* : il faut vérifier les *arguments*, les *fichiers*, et l'*entrée standard*
+Pour les *programmes* et les *scripts* : il faut vérifier les *arguments*, les *fichiers* de *donnée* et de *configuration*, et l'*entrée standard*
 ====
 
 [IMPORTANT]
@@ -72,48 +116,117 @@ Il faut valider la structure et vérifier que *la donnée est bien formée*
 
 Il faut utiliser des éléments *existants*, bien *testés*, et *maintenus* plutôt que de développer des solutions ad-hoc
 
-Par exemple, on utilisera xmllint et SAX/DOM pour XML, ou RFC 4180 et librairie pour CSV
+Par exemple, on utilisera xmllint et SAX/DOM pour XML, ou le format RFC 4180 associé à une librairie externe pour CSV
 ====
 
-Par exemple, *pour un fichier XML*, on vérifiera qu'il est parsable :
-
-* qu'il respecte de l'ordre des tags
-* que les inclusions sont fonctionnelles
-* que les entités sont utilisables
-
-Par exemple, *pour un fichier CSV*, on vérifiera :
+Par exemple *pour un fichier CSV* on  vérifiera *avant de le charger* :
 
 * que le caractère de séparation est celui attendu
 * que le nombre de champs est constants entre les records
 * que le header est présent ou absent selon ce qui est attendu
 * que l'échappement des caractères de séparation est bien fait
 
+=== Type de données
 
+[IMPORTANT]
+====
+Il faut vérifier que chaque donnée _scalaire_ (int, float, bool, string, Objet ...) est bien du *type attendu*
 
+Cette vérification doit avoir lieu *avant* toute phase de conversion éventuellement nécessaire aux vérifications ultérieures
+====
 
+Quand on utilise des technologies se basant sur des *typages forts* (Java, C, C#, Groovy _avec_ vérification stricte...) cette phase est heureusement *assurée* par le langage et le *compilateur* utilisé qui s'assurent de ces vérifications. C'est une des raisons de choisir une technologies de ce type pour un projet.
 
+Malheureusement quand on utilise un langage à *typage faible* (Perl, Php, Javascript, shell, Groovy _sans_ vérification stricte) *aucune* vérification *automatiqueme* n'est faite et il revient au réalisateur de s'assurer de la bonne vérification de toute donnée manipulée.
 
+[NOTE]
+====
+Pour information, concernant les vérification _internes_ :
 
+* *PHP 7.0* a introduit le fait de pouvoir *qualifier le type de chaque paramètre* lors de la déclaration d'une fonction
+* *PHP 7.1* a introduit le fait de pouvoir *qualifier le type de la valeur retournée* par une fonctions
+* le type spécifié peut être un type standard ou une classe
+* cette déclaration est facultative: si rien n'est spécifié, rien n'est vérifié (compatibilité ascendante)
+* de cette manière, lors de l'exécution c'est le moteur PHP qui effectuera les vérification lors de la transmission des données entre les appels *internes* au code PHP
 
+À noter que ce mécanisme *ne dispense pas des contrôles d'entrée périmétriques* mais qu'il simplifie la gestion des contrôles interne des données au sein de chaque module (voir section #TODO)
+====
 
-est ce que la donnée est du type
+==== Exemple pour un entier
 
+On vérifiera d'abord que le *type interne* de la variable passée est compatible avec un entier (bool, int, float, chaine de caractère) sinon on rejettera la valeur.
 
+Si la variable est de type string :
 
+* on vérifiera le format de la string *à l'aide d'une expression régulière* vérifiant que *l'ensemble de la chaine* correspond bien à la représentation *dans la base attendue* (hexadécimale, octale ou décimale) : typiquement `/^-?\d+$/` pour un entier décimal
 
-- le type de chaque fragment de données : entier, flotant, booléen, chaîne de caractères
-- les valeurs : positif, nul, négatif, plage de valeurs, ensemble de valeurs, majuscule/minuscule, expression régulières
+* on prendra soin de détecter les *débordements de capacité* : si la longueur de la chaine correspond à l'une des représentations textuelles des valeurs `PHP_INT_MIN` et `PHP_INT_MAX` pour la plateforme concernée (32 bits ou 64 bits) alors on parcourra la chaîne fournie, du chiffre le plus significatif au chiffre le moins significatif, pour vérifier que chaque digit est inférieur ou égal au digit de la représentation textuelle de la valeur extrême.
 
-En cas de données non-valides :
+==== Exemple pour une date
 
-- une application génèrera des erreurs, qu'elle loggera et présentera à l'utilisateur, rejettera les données et arrêtera le traitement au plus tôt
-- un module applicatif interne génèrera une exception, loggera l'erreur, annulera les tâches en cours dont il a la responsabilité, et remontera l'exception à l'appelant, qui décidera du comportement à adopter face à l'erreur (en général, annulation)
-- au sein d'un même module, une fonction interne appelée par une autre fonction interne validera chaque paramètre à l'aide d'assertions
+[NOTE]
+====
+Concernant la gestion du temps, il est important de savoir que link:https://www.timeanddate.com/news/time/[des pays changent régulièrement de timezone] et que link:https://www.timeanddate.com/time/leapseconds.html[des secondes sont "régulièrement" ajoutées] (d'où le fait d'avoir de temps en temps 61 secondes dans une minute) ou que les décalages horaires peuvent link:https://www.timeanddate.com/time/map/about.html#diagonal[être compris de demi-heures ou de quarts d'heure] ... aussi curieux que ça paraisse !
+====
 
-Important :
+Quand on vérifiera une date donnée :
 
-- les assertions doivent être actives pour tous les environnements, à l'exception de la production afin d'avoir la possibilité de détecter chaque erreur de conception.
-- dans tous les cas, les vérifications de type doivent être faites *avant* conversion automatique, et les vérifications de valeur/plages doivent être *après* conversion éventuelle
-- la vérification multiple d'une même donnée, au fur et à mesure de la chaîne d'appel, permet de garantir l'intégrité à tous les étages, à rester valide quelles que soient les évolutions, notamment à détecter rapidement et facilement les erreurs lors de refactorisations
+* le *type interne* de la variable passée est une chaîne de caractère sinon on rejettera la valeur.
 
-Exemple : pour un script S qui prend un argument numérique, qui appelle une web-service W, qui lui utilise une fonction F, le script S doit vérifier le fait que l'argument soit donné s'il est obligatoire, qu'il est de type entier, que la valeur est autorisée. Le web-service W doit effectuer la même vérification (type, valeur) car le script ne sera peut-être pas le seul point d'entrée du web-service. La fonction F doit effectuer la même vérification (type, valeur) pour les mêmes raisons.
+* le format respecte un *format explicitement défini* et *imposé*, à l'aide d'une expression régulière effectuant la capture des champs, qui seront ensuite vérifiés fonctionnellement.
+
+Par exemple, le format `AAAA-MM-JJ HH:MM:SS TZ` sera vérifié avec l'expression régulière `/^(\d{4}-\d{2}-\d{2}) (\d{2}):(\d{2}):(\d{2}) ([A-Z]+)$/` puis on *effectuera les vérifications fonctionnelles suivantes* sur les éléments capturés :
+
+* la date est valide (rejeter les mois < 1 et > 12, les jours < 1, valider le nombre de jours par mois en fonction des années et des mois, en tenant compte des années bissextiles)
+* l'heure est valide (0 à 23), ainsi que les minutes (0 à 59) et les secondes (0 à 59, sauf exception ci-dessus)
+* la TZ appartient à la liste des timezones valides (cf ci-dessous)
+
+De cette manière, on s'assure de la *cohérence temporelle globale* lors des calculs et des affichages, et on peut transmettre *toutes les informations nécessaires* aux librairies standard qui effectueront alors des calculs corrects sur les dates/heures.
+
+[NOTE]
+====
+Concernant le formalisme de nommage des timezone, on *préférera systématiquement* l'utilisation des *noms abbrégés* (voir link:https://www.timeanddate.com/time/zones/[liste des noms de timezone]) aux indications de décalage temporel (`+0100`). En effet, il est plus difficile de contrôler la cohérence des décalages temporels au fur et à mesure des variations heure d'été et heure d'hiver.
+
+Par exemple avec les noms :
+
+* en hiver on aura `WET` à Londre et `CET` à Paris
+* en été on aura `WEST` à Londre et `CEST` à Paris
+
+Par exemple avec les décalages temporels :
+
+* en hiver on aura `+0000` à Londre et `+0100` à Paris
+* en été on aura `+0100` à Londre et `+0200` à Paris
+
+Conséquences :
+
+* si on voit une date avec une timezone `+0100`, _on ne sait pas_ si on est en heure d'été à Londres ou en heure d'hiver à Paris !
+* alors qu'avec les noms, on comprend tout de suite à quelle zone on fait référence, et si le décallage de l'heure d'été est appliquée ou pas
+====
+
+=== Valeur
+
+Les étapes précédentes correspondent à une *validation technique*, qui consiste à vérifier que les données sont *bien formées*, avant conversion et en amont de toute utilisation.
+
+Il est ensuite possible de réaliser une *validation fonctionnelle* sur les valeurs possibles pour le type attendu.
+
+[IMPORTANT]
+====
+Il faut vérifier que les *valeurs* sont *comprises* dans les *plages* ou *ensembles* attendus
+
+Cette vérification doit avoir lieu *après* toute phase de conversion éventuellement nécessaire aux vérifications ultérieures
+====
+
+Les questions à se poser lors de la validation des valeurs :
+
+* est ce qu'un entier doit être positif, négatif, strictement positif, strictement négatif, appartenir à une plage de valeurs...
+* est ce qu'une chaîne de caractère doit appartenir à un ensemble de chaines possible, ou bien respecter une certaine structure
+* est ce qu'un fichier XML est valide au regard d'un XSD/DTD
+* est ce qu'un tableau doit contenir un certain nombre d'entrées, ou des entrées qui soient toutes de même type ...
+* est ce qu'on a bien le nombre de champs attendus par record dans un fichier CSV
+
+Quelques exemples de contraintes fonctionnelles typiques :
+
+* un indice (en PHP), un compteur, une température (une fois convertie en Kelvin), une durée de timeout, un nombre d'essais, doivent tous être positifs ou nuls
+* nombre de threads à lancer au démarrage d'un process appartient à la plage [5-20]
+* un élément XML doit être un fils/frère d'un autre élément
+* ...

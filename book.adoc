@@ -16,6 +16,22 @@ include::validation.adoc[]
 
 
 
+= Gestion d'erreurs
+En cas de données non-valides :
+
+- une application génèrera des erreurs, qu'elle loggera et présentera à l'utilisateur, rejettera les données et arrêtera le traitement au plus tôt
+- un module applicatif interne génèrera une exception, loggera l'erreur, annulera les tâches en cours dont il a la responsabilité, et remontera l'exception à l'appelant, qui décidera du comportement à adopter face à l'erreur (en général, annulation)
+- au sein d'un même module, une fonction interne appelée par une autre fonction interne validera chaque paramètre à l'aide d'assertions
+
+Important :
+
+- les assertions doivent être actives pour tous les environnements, à l'exception de la production afin d'avoir la possibilité de détecter chaque erreur de conception.
+- dans tous les cas, les vérifications de type doivent être faites *avant* conversion automatique, et les vérifications de valeur/plages doivent être *après* conversion éventuelle
+- la vérification multiple d'une même donnée, au fur et à mesure de la chaîne d'appel, permet de garantir l'intégrité à tous les étages, à rester valide quelles que soient les évolutions, notamment à détecter rapidement et facilement les erreurs lors de refactorisations
+
+Exemple : pour un script S qui prend un argument numérique, qui appelle une web-service W, qui lui utilise une fonction F, le script S doit vérifier le fait que l'argument soit donné s'il est obligatoire, qu'il est de type entier, que la valeur est autorisée. Le web-service W doit effectuer la même vérification (type, valeur) car le script ne sera peut-être pas le seul point d'entrée du web-service. La fonction F doit effectuer la même vérification (type, valeur) pour les mêmes raisons.
+
+
 
 
 

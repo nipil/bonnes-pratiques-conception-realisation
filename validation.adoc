@@ -11,6 +11,21 @@ La validation des données fait partie du paradigme "link:++https://en.wikipedia
 
 A noter qu'un producteur peut être une simple fonction retournant une valeur, ou la partie génération d'un générateur de site web statique ; de même, un consommateur peut être une simple fonction prenant un paramètre, ou un navigateur web.
 
+== Pourquoi vérifier ?
+
+[IMPORTANT]
+====
+Il faut *connaître les données* qu'on manipule
+
+Il est *inacceptable* de manipuler des *éléments inconnus*
+====
+
+Il est aisé de se dire aussi que dans 99% des cas, on aura pas de problème, et qu'il est au contraire lourd et coûteux de s'assurer qu'on est dans la situation nominale. Ce faisant, on creuse la dette technique : le besoin reste, et le jour on sera contrait de le traiter, il sera coûteux de le traiter, et ça arrivera forcément à un moment inconfortable.
+
+*Ne pas vérifier ses données revient à un pari sur l'avenir* : en effet, manipuler des éléments inconnus revient à espérer qu'on nous fournisse toujours des données correctes. Le principe de réalité et la loi de Murphy viennent en opposition avec cette vue optimiste, en rappelant que si quelque chose de négatif peut arriver, il arrivera, et il faut donc s'en prémunir.
+
+On peut par contre aussi considérer que *la mise en place de vérification est drastiquement réduit s'il est fait au fil de l'eau*, de manière systématique : *on profite directement des bénéfices*.
+
 == Périmètre
 
 Une application est segmentée en composants (techniques, fonctionnels, systèmes, applicatifs, internes, externes...)

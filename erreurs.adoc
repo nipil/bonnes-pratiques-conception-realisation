@@ -1,0 +1,80 @@
+= Gestion d'erreurs
+
+[quote]
+Build to fail, and fail nicely
+
+Dans la partie <<Validation systématique des données>> nous avons pu voir que la vérification des données entraîne soit une acceptation soit un rejet. Dans la présente partie, nous aborderons *les traitements relatifs au rejet des données*.
+
+== Différentes politiques de rejet
+
+Nous avons aussi vu qu'un projet, une application, un programme sont découpés en composants, et ces composants peuvent être de deux types :
+
+* des composants internes interragissant avec des éléments internes
+* des composants internes interragissant des éléments externes
+** dont ceux interagissant avec des composants externes "machine"
+** dont ceux intéragissant avec des éléments externes "humains"
+
+Ce découpage permettra de définir différentes consignes de rejet, décrites ci-dessous
+
+=== Rejet dans les composants internes
+
+Au sein d'un composant interne il y a certes un contrat, mais il est implicite et évolutif, _aussi longtemps que ce composant interne n'est pas publié ni réutilisé_. C'est le concepteur/réalisateur qui s'assure intellectuellement de la cohérence de l'ensemble.
+
+Pour s'assurer de ce respect, il va utiliser les vérifications "faibles" qui visent à *vérifier "ce qui a déjà été vérifié"*, notamment du fait que ces vérifications internes seront généralement désactivées en production pour des raisons de performance. L'outil de choix pour ces vérifications faibles sont les *assertions*.
+
+[IMPORTANT]
+====
+Il faut valider les valeurs de chaque paramètre de chaque fonction par une assertion (quand c'est possible)
+====
+
+[IMPORTANT]
+====
+Les assertions doivent être actives sur l'ensemble des environnements (DEV, RECETTES, INTEX) pour détecter le maximum de problèmes, mais ne doivent pas être actives en production pour des raisons de performances
+====
+
+
+
+
+- une application génèrera des erreurs, qu'elle loggera et présentera à l'utilisateur, rejettera les données et arrêtera le traitement au plus tôt
+- un module applicatif interne génèrera une exception, loggera l'erreur, annulera les tâches en cours dont il a la responsabilité, et remontera l'exception à l'appelant, qui décidera du comportement à adopter face à l'erreur (en général, annulation)
+- au sein d'un même module, une fonction interne appelée par une autre fonction interne validera chaque paramètre à l'aide d'assertions
+
+
+== Pénétration minimale
+
+[quote]
+Fail early
+
+
+
+
+
+== Rejet expressif
+
+[quote]
+Be expressive about your failures
+
+
+== Atomicité et idempotence
+
+[quote]
+Donnez le résultat attendu, ou bien remontez les problèmes
+
+Ce principe est issu d'un paradigme de *simplicité pour l'humain* : l'informatique est là pour simplifier la gestion, pas pour la complexifier. En conséquence, il faut toujours *simplifier le travail de l'utilisateur, même si c'est au détriment du travail du concepteur/réalisateur*.
+
+Cette logique vient du fait que _le travail du concepteur/réalisateur n'est réalisé qu'une seule fois et est complexe par nature_, alors que _le travail de l'utilisateur est possiblement répétable et doit être aussi simple que possible_.
+
+En conséquence, un programme doit certes être aussi simple que possible, mais sera tout de même complexe, si cette complexité simplifie l'utilisation du produit.
+
+
+
+
+
+
+Important :
+
+- les assertions doivent être actives pour tous les environnements, à l'exception de la production afin d'avoir la possibilité de détecter chaque erreur de conception.
+- dans tous les cas, les vérifications de type doivent être faites *avant* conversion automatique, et les vérifications de valeur/plages doivent être *après* conversion éventuelle
+- la vérification multiple d'une même donnée, au fur et à mesure de la chaîne d'appel, permet de garantir l'intégrité à tous les étages, à rester valide quelles que soient les évolutions, notamment à détecter rapidement et facilement les erreurs lors de refactorisations
+
+Exemple : pour un script S qui prend un argument numérique, qui appelle une web-service W, qui lui utilise une fonction F, le script S doit vérifier le fait que l'argument soit donné s'il est obligatoire, qu'il est de type entier, que la valeur est autorisée. Le web-service W doit effectuer la même vérification (type, valeur) car le script ne sera peut-être pas le seul point d'entrée du web-service. La fonction F doit effectuer la même vérification (type, valeur) pour les mêmes raisons.

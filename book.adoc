@@ -1,5 +1,4 @@
 = Bonnes pratiques pour la conception et la réalisation
-:doctype: book
 :toc: left
 :toclevels: 3
 :sectnums:
@@ -31,7 +30,7 @@ include::erreurs.adoc[]
 
 
 
-= Comportement indéfini
+== Comportement indéfini
 
 "Tracer et remonter les comportements non-définis"
 
@@ -45,15 +44,27 @@ Il est important :
 
 Exemple: si une spécification référence un entier de 1 à 3, tout autre valeur doit logger l'occurence et remonter une exception
 
-= Lexique
+== Lexique
 
 maintenir la cohérence entre comportement et sémantique
 
 Exemple: si un script redémarre (restart) un daemon, ne pas l'appeler reload (qui recharger habituellement la configuration sans redémarrer)
 
-= Intégrité et atomicité des opérations
+== Intégrité et atomicité des opérations
 
-Principe : "Donner exactement le résultat attendu, ou annuler l'ensemble et remonter le problème"
+[quote]
+Donnez le résultat attendu, ou bien remontez les problèmes
+
+Ce principe est issu d'un paradigme de *simplicité pour l'humain* : l'informatique est là pour simplifier la gestion, pas pour la complexifier. En conséquence, il faut toujours *simplifier le travail de l'utilisateur, même si c'est au détriment du travail du concepteur/réalisateur*.
+
+Cette logique vient du fait que _le travail du concepteur/réalisateur n'est réalisé qu'une seule fois et est complexe par nature_, alors que _le travail de l'utilisateur est possiblement répétable et doit être aussi simple que possible_.
+
+En conséquence, un programme doit certes être aussi simple que possible, mais sera tout de même complexe, si cette complexité simplifie l'utilisation du produit.
+
+
+
+
+
 
 Consigne :
 
@@ -64,7 +75,22 @@ Consigne :
 
 Exemple: arrêt gracieux des moteurs entre 2 itérations
 
-= Données et métadonnées
+
+- une application génèrera des erreurs, qu'elle loggera et présentera à l'utilisateur, rejettera les données et arrêtera le traitement au plus tôt
+- un module applicatif interne génèrera une exception, loggera l'erreur, annulera les tâches en cours dont il a la responsabilité, et remontera l'exception à l'appelant, qui décidera du comportement à adopter face à l'erreur (en général, annulation)
+- au sein d'un même module, une fonction interne appelée par une autre fonction interne validera chaque paramètre à l'aide d'assertions
+
+
+
+
+Important :
+
+- la vérification multiple d'une même donnée, au fur et à mesure de la chaîne d'appel, permet de garantir l'intégrité à tous les étages, à rester valide quelles que soient les évolutions, notamment à détecter rapidement et facilement les erreurs lors de refactorisations
+
+Exemple : pour un script S qui prend un argument numérique, qui appelle une web-service W, qui lui utilise une fonction F, le script S doit vérifier le fait que l'argument soit donné s'il est obligatoire, qu'il est de type entier, que la valeur est autorisée. Le web-service W doit effectuer la même vérification (type, valeur) car le script ne sera peut-être pas le seul point d'entrée du web-service. La fonction F doit effectuer la même vérification (type, valeur) pour les mêmes raisons.
+
+
+== Données et métadonnées
 
 "Les données doivent être complètement définies"
 
@@ -83,7 +109,7 @@ Consigne :
 - il doit être possible de tracer de bout en bout la valeur des paramètres
 - il faut garantir la cohérence des données entre les modules, applications, et middleware
 
-= Evolution des données
+== Evolution des données
 
 schémas global:
 - migration à froid (arret migration relance) : une version avant, une autre après
@@ -91,7 +117,7 @@ schémas global:
 - versionning des schémas de données : migration explicite
 - versionning des structures de données dans le code : pour validation et cohérence avec le schémas de donnée
 
-= sécurité
+== sécurité
 
 - toujours utiliser des requêtes paramétrées pour intégrer les valeurs dans les requêtes sql, pour éviter les problèmes d'échapement et se protéger des injections sql
 
@@ -104,7 +130,7 @@ schémas global:
 - si des contrôles sont fait côté utilisateur (javascript et autres) afin d'aider à la saisie, il ne sont qu'utilitaires : il faut toujours refaire les mêmes contrôles (cf validation des entrées) dans le back-end côté serveur, car les vérifications côté clients peuvent être facilement contournées
 
 
-= base de données
+== base de données
 
 tout accès à une base doit faire l'objet d'une transaction
 toute transaction non explicitement commitée doit faire l'objet d'un rollback implicite
@@ -114,12 +140,12 @@ décorréler les id fonctionels du technique, key sur technique contraintes sur 
 timestamps des modifs pour permettre de check les overwrites
 ajouter un maximum de contraintes permettant de valider les valeurs des données
 
-= portabilité
+== portabilité
 
 aucun élément ne doit être hard-codé
 posix ou spécifique (si bash, alors bash)
 
-= scripts
+== scripts
 
 scope des variables
 surcharge éventuelle pour les éléments non paramétrables pour éviter les modification
@@ -128,7 +154,7 @@ segmentation en commandes unitaires plutôt qu'en chaine
 factoriser le code en fonction
 factoriser le code en librairies
 
-= concurrence et parallèlisme
+== concurrence et parallèlisme
 
 lister tous les accès en écriture possibles sur chaque élément technique manipulé par le produit (fichier, données, session)
 si une concurrence est techniquement possible il est obligatoire de la gérer, au tout du moins de rejeter le cas
@@ -136,7 +162,7 @@ partager les informations entre les différents éléments techniques travaillan
 
 chaque élément contrôle son environnement d'exécution : si un hy doit gérer N moteur, préférer un daemon master qui spawn N children, et qui contrôle qu'on a pas plus d'un child de chaque type lancé
 
-= vrac
+== vrac
 
 good software doest what is told, great software does only what it is supposed to + le nécessaire n'est pas suffisant
 purge avant déploiement

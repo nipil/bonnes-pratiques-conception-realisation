@@ -1,4 +1,4 @@
-= Validation systématique des données
+== Validation systématique des données
 
 [quote]
 Un bon programme fait ce qu'on lui demande, un excellent programme refuse ce qu'il n'est pas sensé faire
@@ -11,7 +11,7 @@ La validation des données fait partie du paradigme "link:++https://en.wikipedia
 
 A noter qu'un producteur peut être une simple fonction retournant une valeur, ou la partie génération d'un générateur de site web statique ; de même, un consommateur peut être une simple fonction prenant un paramètre, ou un navigateur web.
 
-== Pourquoi vérifier ?
+=== Pourquoi ?
 
 [IMPORTANT]
 ====
@@ -26,7 +26,7 @@ Il est aisé de se dire aussi que dans 99% des cas, on aura pas de problème, et
 
 On peut par contre aussi considérer que *la mise en place de vérification est drastiquement réduit s'il est fait au fil de l'eau*, de manière systématique : *on profite directement des bénéfices*.
 
-== Périmètre
+=== Le périmètre
 
 Une application est segmentée en composants (techniques, fonctionnels, systèmes, applicatifs, internes, externes...)
 
@@ -37,7 +37,7 @@ Il faut identifier de manière *exaustive* et synthétique *chaque point d'entr�
 
 Cette phase est vitale, car elle permet de construire l'inventaire des éléments à vérifier, pour la phase de vérification qui suit.
 
-== Vérification entrantes
+=== Les entrées
 
 [quote]
 Build defensive.
@@ -61,7 +61,7 @@ L'impact de validation sur les performances est sans intérêt, pour deux raison
 
 Bien entendu, on factorisera le code de vérification dans une fonction/classe de vérification qu'on testera avec rigueur : on implémentera *un nombre conséquent de tests* permettant de valider le rejet d'un maximum de cas d'erreur (forme, débordement) car c'est surtout l'aspect rejet qui est important
 
-== Vérification sortantes
+=== Les sorties
 
 [quote]
 Do not feed garbage
@@ -86,7 +86,7 @@ Au regard de la section précédente, la question des sorties "bien formées et 
 Cependant, que ça soit parce qu'on ne maîtrise pas les entités consommatrices, ou parce qu'en cas de consommateurs multiples, _seul le producteur peut assurer la cohérence de l'ensemble fourni aux consommateurs_ il est préférable de s'assurer de cet aspect pour éviter de devoir gérer côté producteur les rejets des données mal formées qu'il fournirait, vis à vis de l'action de l'ensemble des consommateurs.
 ====
 
-== Quoi vérifier ?
+=== Quoi vérifier ?
 
 Tous les éléments sont concernées par cette vérification :
 
@@ -112,9 +112,9 @@ Pour les *IHM* et les *API* : il faut vérifier *chaque élément soumis* : sais
 Pour le *code* : il faut vérifier *chaque arguments de chaque fonction*, les *variables accessibles dans le scope*, les *valeurs de sorties* (qu'elles soient retournées par valeur ou via un passage par référence)
 ====
 
-== Que vérifier ?
+=== Que vérifier ?
 
-=== Disponibilité
+==== Disponibilité
 
 [IMPORTANT]
 ====
@@ -123,7 +123,7 @@ Il faut vérifier si les données sont *présentes ou absentes* (fichiers, argum
 Il faut ensuite *accepter* ou *rejeter* chaque donnée en fonction de résultat et de leur caractère *obligatoire* ou *facultatives*
 ====
 
-=== Structure
+==== Structure
 
 [IMPORTANT]
 ====
@@ -141,7 +141,7 @@ Par exemple *pour un fichier CSV* on  vérifiera *avant de le charger* :
 * que le header est présent ou absent selon ce qui est attendu
 * que l'échappement des caractères de séparation est bien fait
 
-=== Type de données
+==== Type
 
 [IMPORTANT]
 ====
@@ -167,7 +167,7 @@ Pour information, concernant les vérification _internes_ :
 À noter que ce mécanisme *ne dispense pas des contrôles d'entrée périmétriques* mais qu'il simplifie la gestion des contrôles interne des données au sein de chaque module (voir section #TODO)
 ====
 
-==== Exemple pour un entier
+===== Exemple pour un entier
 
 On vérifiera d'abord que le *type interne* de la variable passée est compatible avec un entier (bool, int, float, chaine de caractère) sinon on rejettera la valeur.
 
@@ -177,7 +177,7 @@ Si la variable est de type string :
 
 * on prendra soin de détecter les *débordements de capacité* : si la longueur de la chaine correspond à l'une des représentations textuelles des valeurs `PHP_INT_MIN` et `PHP_INT_MAX` pour la plateforme concernée (32 bits ou 64 bits) alors on parcourra la chaîne fournie, du chiffre le plus significatif au chiffre le moins significatif, pour vérifier que chaque digit est inférieur ou égal au digit de la représentation textuelle de la valeur extrême.
 
-==== Exemple pour une date
+===== Exemple pour une date
 
 [NOTE]
 ====
@@ -218,7 +218,7 @@ Conséquences :
 * alors qu'avec les noms, on comprend tout de suite à quelle zone on fait référence, et si le décallage de l'heure d'été est appliquée ou pas
 ====
 
-=== Valeurs
+==== Valeurs
 
 [quote]
 Le nécessaire n'est pas suffisant
@@ -257,3 +257,24 @@ Quelques exemples de contraintes fonctionnelles typiques :
 * un indice (en PHP), un compteur, une température (une fois convertie en Kelvin), une durée de timeout, un nombre d'essais, doivent tous être positifs ou nuls
 * nombre de threads à lancer au démarrage d'un process appartient à la plage [5-20]
 * un élément XML doit être un fils/frère d'un autre élément
+
+=== Quand vérifier ?
+
+[quote]
+Fail early
+
+Plus on attend, plus les données pénètrent profondément dans le système, et moins les éléments disposent d'informations et de contexte pour gérer les données invalides.
+
+[IMPORTANT]
+====
+Il faut contrôler les données au plus tôt, au plus proche du périmètre externe
+
+Il faut réduire au minimum la pénétration des données invalides dans le système
+====
+
+En conséquence, on prendra soin (entre autres) de :
+
+* vérifier les *arguments* et les *paramètres*, ainsi que les *fichiers de configuration* immédiatement *au lancement du programme*
+* vérifier les *fichiers* de données *dès qu'ils seront désignés*
+* vérifier les *URL* dès le routeur
+* vérifier les *données* et les *paramètres* des requêtes dès le *contrôleur*

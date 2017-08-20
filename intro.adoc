@@ -1,6 +1,6 @@
-= Introduction
+== Introduction
 
-== Croissance du savoir
+=== Croissance du savoir
 
 Le savoir humain s'est construit de génération en génération : on apprend un certain nombre de choses, on en découvre éventuellement de nouvelles,  et on transmet éventuellement ce savoir, afin d'alimenter les générations suivantes. Ceci est bien sûr valable quel que soit le domaine, y compris l'informatique.
 
@@ -9,7 +9,7 @@ Il y a deux facteurs limitants à cette dynamique de croissance du savoir :
 * la quantité de choses apprise : moins on apprend, plus on est voués à re-découvrir les choses déjà découvertes par d'autres, ce qui entraîne une perte de temps et d'énergie
 * la quantité de choses transmises : moins on transmet, plus le temps et l'énergie dévouée à ces découvertes est perdue pour la communauté
 
-== Pourquoi ce document ?
+=== Pourquoi ce document ?
 
 Au regard de la section ci-dessus, le présent document vise donc (dans la limite de ses moyens) à faciliter à la fois l'apprentissage et la transmission du savoir.
 
@@ -19,7 +19,7 @@ Nous rédigeons ce document en partant des principes suivants :
 * une majorité de problèmes ont déjà été découvert, étudiés et résolus
 * une mise en forme synthétique et groupée facilite la transmission et la prise en compte
 
-== Présentation du contenu
+=== Présentation du contenu
 
 Ce guide vise donc à présenter de manière organisée et synthétique, l'ensemble des problématiques à connaître, et à appliquer lors de la conception ou la réalisation d'un élément.
 
@@ -33,6 +33,6 @@ Le document restera cependant général : chaque point abordé sera expliqué, u
 
 Chaque partie abordera un ensemble de problèmes, avec des sections dédiées et progressives pour le traitment de chaque point thématique relevant de cette classe de problèmes.
 
-== Évolution
+=== Évolution
 
 Bien sûr, ce document a vocation à évoluer, pour aborder de nouvelles thématiques, ou améliorer les solutions proposées, en fonction de nos expériences, et des suggestions qui seront faites.

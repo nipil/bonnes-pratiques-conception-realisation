@@ -5,7 +5,7 @@ Un bon programme fait ce qu'on lui demande, un excellent programme refuse ce qu'
 
 La validation des données fait partie du paradigme "link:++https://en.wikipedia.org/wiki/Design_by_contract++[Design by contract]". Ce concept s'articule autour du fait que :
 
-* *un contrat "de fait" existe* entre chaque *producteur* et chaque *consommateur*
+* *un contrat existe* "de fait" entre chaque *producteur* et chaque *consommateur*
 * ce contrat peut être *documenté*, mais le fait de le documenter *ne garanti absolument pas* le respect du contrat
 * il est donc nécessaire de *s'assurer du respect* du contrat *à chacune des étapes de sa vie*
 
@@ -15,16 +15,14 @@ A noter qu'un producteur peut être une simple fonction retournant une valeur, o
 
 [IMPORTANT]
 ====
-Il faut *connaître les données* qu'on manipule
-
-Il est *inacceptable* de manipuler des *éléments inconnus*
+Il est *inacceptable* de manipuler des *éléments non-vérifiés*
 ====
 
-Il est aisé de se dire aussi que dans 99% des cas, on aura pas de problème, et qu'il est au contraire lourd et coûteux de s'assurer qu'on est dans la situation nominale. Ce faisant, on creuse la dette technique : le besoin reste, et le jour on sera contrait de le traiter, il sera coûteux de le traiter, et ça arrivera forcément à un moment inconfortable.
+Il est aisé de se dire aussi que dans 99% des cas, on aura pas de problème, et qu'il est au contraire lourd et coûteux de s'assurer qu'on est dans la situation nominale. Ce faisant, on creuse la dette technique : le besoin reste, et le jour où on sera contraint de le traiter, il deviendra coûteux de le faire, et ça arrivera forcément à un moment inconfortable.
 
 *Ne pas vérifier ses données revient à un pari sur l'avenir* : en effet, manipuler des éléments inconnus revient à espérer qu'on nous fournisse toujours des données correctes. Le principe de réalité et la loi de Murphy viennent en opposition avec cette vue optimiste, en rappelant que si quelque chose de négatif peut arriver, il arrivera, et il faut donc s'en prémunir.
 
-On peut par contre aussi considérer que *la mise en place de vérification est drastiquement réduit s'il est fait au fil de l'eau*, de manière systématique : *on profite directement des bénéfices*.
+On peut par contre aussi considérer que *le coût de mise en place est drastiquement réduit s'il est fait au fil de l'eau* et on profite directement des bénéfices.
 
 En effet, la vérification au fur et à mesure de la chaîne d'appel permet de garantir la cohérence quelle que soient les évolutions, et aide à détecter rapidement et facilement les erreurs et oublis lors de refactorisations et des nouvelles conceptions.
 
@@ -61,7 +59,7 @@ L'impact de validation sur les performances est sans intérêt, pour deux raison
 * d'autre part, ce type de vérification n'est à effectuer qu'aux bordures de périmètres (et donc normalement *une seule fois par donnée entrée*)
 ====
 
-Bien entendu, on factorisera le code de vérification dans une fonction/classe de vérification qu'on testera avec rigueur : on implémentera *un nombre conséquent de tests* permettant de valider le rejet d'un maximum de cas d'erreur (forme, débordement) car c'est surtout l'aspect rejet qui est important
+Bien entendu, on factorisera le code de vérification dans une fonction/classe de vérification qu'on testera avec rigueur : on implémentera *un nombre conséquent de tests* permettant de valider le rejet d'un maximum de *cas d'erreur* (forme, débordement) car c'est surtout l'aspect rejet qui est important
 
 === Les sorties
 
@@ -78,14 +76,14 @@ Le producteur d'une sortie doit s'assurer de l'intégrité et de la cohérence d
 Notamment :
 
 * il doit fournir des éléments bien formés et valides à ses consommateurs (_respect du contrat_)
-* il ne doit mettre/laisser à disposition que les éléments nécessaires aux seuls consommateurs souhaités (_purge_)
-* il doit informer les consommateurs de la mise à jour (ajout/modification/suppression) des éléments qu'il fournit afin qu'ils puissent se mettre à jour
+* il ne doit mettre/laisser à disposition *que* les éléments nécessaires et *aux seuls* consommateurs souhaités (_purge_)
+* il doit *informer les consommateurs* de la mise à jour (ajout/modification/suppression) des éléments qu'il fournit
 
 [NOTE]
 ====
 Au regard de la section précédente, la question des sorties "bien formées et valides" ne devrait pas poser de problèmes, car le consommateur doit vérifier systématiquement toutes ses entrées.
 
-Cependant, que ça soit parce qu'on ne maîtrise pas les entités consommatrices, ou parce qu'en cas de consommateurs multiples, _seul le producteur peut assurer la cohérence de l'ensemble fourni aux consommateurs_ il est préférable de s'assurer de cet aspect pour éviter de devoir gérer côté producteur les rejets des données mal formées qu'il fournirait, vis à vis de l'action de l'ensemble des consommateurs.
+Cependant, que ça soit parce qu'on ne maîtrise pas les entités consommatrices, ou parce qu'en cas de consommateurs multiples, *seul le producteur peut assurer la cohérence de l'ensemble fourni aux consommateurs*, il est préférable de s'assurer de cet aspect pour éviter de devoir gérer les rejets des données mal formées fournies aux consommateurs.
 ====
 
 === Quoi vérifier ?
@@ -106,7 +104,7 @@ Pour les *programmes* et les *scripts* : il faut vérifier les *arguments*, les 
 
 [IMPORTANT]
 ====
-Pour les *IHM* et les *API* : il faut vérifier *chaque élément soumis* : saisie utilisateurs, id d'objets, widget sélectionné, headers et cookie...
+Pour les *IHM* et les *API*, il faut vérifier *chaque élément soumis* : saisie utilisateurs, id d'objets, widget sélectionné, headers et cookie...
 ====
 
 [IMPORTANT]
@@ -127,21 +125,24 @@ Il faut ensuite *accepter* ou *rejeter* chaque donnée en fonction de résultat 
 
 ==== Structure
 
-[IMPORTANT]
-====
-Il faut valider la structure et vérifier que *la donnée est bien formée*
-
-Il faut utiliser des éléments *existants*, bien *testés*, et *maintenus* plutôt que de développer des solutions ad-hoc
-
-Par exemple, on utilisera xmllint et SAX/DOM pour XML, ou le format RFC 4180 associé à une librairie externe pour CSV
-====
-
-Par exemple *pour un fichier CSV* on  vérifiera *avant de le charger* :
+Par exemple *pour un fichier CSV* on vérifiera *avant de le charger* :
 
 * que le caractère de séparation est celui attendu
 * que le nombre de champs est constants entre les records
 * que le header est présent ou absent selon ce qui est attendu
 * que l'échappement des caractères de séparation est bien fait
+
+[IMPORTANT]
+====
+Il faut valider la structure et vérifier que *la donnée est bien formée*
+
+Il faut utiliser des éléments *existants*, bien *testés*, et *maintenus* plutôt que de développer des solutions ad-hoc
+====
+
+En l'occurence, on utilisera :
+
+* `xmllint` ou un parser SAX/DOM pour XML
+* le format RFC 4180 associé à une librairie externe pour CSV
 
 ==== Type
 
@@ -149,12 +150,12 @@ Par exemple *pour un fichier CSV* on  vérifiera *avant de le charger* :
 ====
 Il faut vérifier que chaque donnée _scalaire_ (int, float, bool, string, Objet ...) est bien du *type attendu*
 
-Cette vérification doit avoir lieu *avant* toute phase de conversion éventuellement nécessaire aux vérifications ultérieures
+Il faut vérifier *avant* toute phase de conversion éventuelle
 ====
 
 Quand on utilise des technologies se basant sur des *typages forts* (Java, C, C#, Groovy _avec_ vérification stricte...) cette phase est heureusement *assurée* par le langage et le *compilateur* utilisé qui s'assurent de ces vérifications. C'est une des raisons de choisir une technologies de ce type pour un projet.
 
-Malheureusement quand on utilise un langage à *typage faible* (Perl, Php, Javascript, shell, Groovy _sans_ vérification stricte) *aucune* vérification *automatiqueme* n'est faite et il revient au réalisateur de s'assurer de la bonne vérification de toute donnée manipulée.
+Malheureusement quand on utilise un langage à *typage faible* (Perl, Php, Javascript, shell, Groovy _sans_ vérification stricte) *aucune* vérification *automatique* n'est faite et il revient au réalisateur de s'assurer de la bonne vérification de toute donnée manipulée.
 
 [NOTE]
 ====
@@ -166,7 +167,7 @@ Pour information, concernant les vérification _internes_ :
 * cette déclaration est facultative: si rien n'est spécifié, rien n'est vérifié (compatibilité ascendante)
 * de cette manière, lors de l'exécution c'est le moteur PHP qui effectuera les vérification lors de la transmission des données entre les appels *internes* au code PHP
 
-À noter que ce mécanisme *ne dispense pas des contrôles d'entrée périmétriques* mais qu'il simplifie la gestion des contrôles interne des données au sein de chaque module (voir section #TODO)
+À noter que ce mécanisme *ne dispense pas des contrôles d'entrée périmétriques* mais qu'il simplifie la gestion des contrôles interne des données au sein de chaque module
 ====
 
 ===== Exemple pour un entier
@@ -175,7 +176,9 @@ On vérifiera d'abord que le *type interne* de la variable passée est compatibl
 
 Si la variable est de type string :
 
-* on vérifiera le format de la string *à l'aide d'une expression régulière* vérifiant que *l'ensemble de la chaine* correspond bien à la représentation *dans la base attendue* (hexadécimale, octale ou décimale) : typiquement `/^-?\d+$/` pour un entier décimal
+* on vérifiera le format de la string *à l'aide d'une expression régulière* vérifiant que *l'ensemble de la chaine* correspond bien à la représentation *dans la base attendue* (hexadécimale, octale ou décimale)
+
+** typiquement on utilisera `/^-?\d+$/` pour un entier décimal
 
 * on prendra soin de détecter les *débordements de capacité* : si la longueur de la chaine correspond à l'une des représentations textuelles des valeurs `PHP_INT_MIN` et `PHP_INT_MAX` pour la plateforme concernée (32 bits ou 64 bits) alors on parcourra la chaîne fournie, du chiffre le plus significatif au chiffre le moins significatif, pour vérifier que chaque digit est inférieur ou égal au digit de la représentation textuelle de la valeur extrême.
 
@@ -216,7 +219,7 @@ Par exemple avec les décalages temporels :
 
 Conséquences :
 
-* si on voit une date avec une timezone `+0100`, _on ne sait pas_ si on est en heure d'été à Londres ou en heure d'hiver à Paris !
+* une timezone `+0100` *ne permet pas de savoir* si on est en heure d'été à Londres ou en heure d'hiver à Paris !
 * alors qu'avec les noms, on comprend tout de suite à quelle zone on fait référence, et si le décallage de l'heure d'été est appliquée ou pas
 ====
 
@@ -233,7 +236,7 @@ Bien sûr, en l'absence de consignes fournies, il est envisageable de ne pas fai
 
 [IMPORTANT]
 ====
-Il faut essayer d'*établir les limites fonctionnelles* pertinentes _si elles ne sont pas connues ou fournies_
+Il faut essayer d'*établir les limites fonctionnelles* pertinentes *si elles ne sont pas connues*
 ====
 
 [IMPORTANT]
@@ -252,13 +255,13 @@ Les questions à se poser lors de la validation des valeurs :
 * est ce qu'une chaîne de caractère doit appartenir à un ensemble de chaines possible, ou bien respecter une certaine structure
 * est ce qu'un fichier XML est valide au regard d'un XSD/DTD
 * est ce qu'un tableau doit contenir un certain nombre d'entrées, ou des entrées qui soient toutes de même type ...
-* est ce qu'on a bien le nombre de champs attendus par record dans un fichier CSV
+* est ce qu'on a bien le nombre de champs attendus par record, ou le nombre de record attendu, dans un fichier CSV
 
 Quelques exemples de contraintes fonctionnelles typiques :
 
 * un indice (en PHP), un compteur, une température (une fois convertie en Kelvin), une durée de timeout, un nombre d'essais, doivent tous être positifs ou nuls
-* nombre de threads à lancer au démarrage d'un process appartient à la plage [5-20]
-* un élément XML doit être un fils/frère d'un autre élément
+* nombre de threads à lancer au démarrage d'un process appartient par exemple à la plage [5-20]
+* un élément XML donné doit être un fils/frère d'un autre élément donné
 
 === Quand vérifier ?
 
@@ -269,14 +272,15 @@ Plus on attend, plus les données pénètrent profondément dans le système, et
 
 [IMPORTANT]
 ====
-Il faut contrôler les données au plus tôt, au plus proche du périmètre externe
+Il faut *contrôler* les données *au plus tôt*, au plus proche du périmètre externe
 
 Il faut réduire au minimum la pénétration des données invalides dans le système
 ====
 
 En conséquence, on prendra soin (entre autres) de :
 
-* vérifier les *arguments* et les *paramètres*, ainsi que les *fichiers de configuration* immédiatement *au lancement du programme*
+* vérifier les *arguments* et les *paramètres* immédiatement *au lancement du programme*
+* vérifier les *fichiers de configuration* immédiatement *au lancement du programme*
 * vérifier les *fichiers* de données *dès qu'ils seront désignés*
 * vérifier les *URL* dès le routeur
 * vérifier les *données* et les *paramètres* des requêtes dès le *contrôleur*

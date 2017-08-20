@@ -5,7 +5,9 @@ Fais exactement ce qui doit être fait, ou ne fait rien du tout
 
 === Simplicité pour l'utilisateur
 
-Ce principe est issu d'un paradigme de *simplicité*, mais appliqué à la personne qui trouve son intérêt dans l'*utilisation* du produit. Le raisonnement est le suivant :
+Du point de vue de l'utilisateur, l'archétype du fonctionnement simple, appréhendable, et reproductible consiste à respecter *le principe de "tout ou rien"*
+
+En partant de ce constat, on fera l'analyse suivante :
 
 * le produit est là pour servir les intérêts _de l'utilisateur_, et non ceux du concepteur/réalisateur
 * le travail de l'_utilisateur_ est possiblement _répétable_ et doit être aussi _simple_ que possible
@@ -13,12 +15,8 @@ Ce principe est issu d'un paradigme de *simplicité*, mais appliqué à la perso
 
 [IMPORTANT]
 ====
-Il faut *simplifier le travail de l'utilisateur*, même si cela a pour effet de *complexifier le travail du concepteur/réalisateur*
+Il faut fonctionner en *mode "tout ou rien"* pour *simplifier le travail de l'utilisateur* même si cela a pour effet de *complexifier le travail du concepteur/réalisateur*
 ====
-
-En conséquence, un programme doit certes être aussi simple que possible (pour être maintenable) mais sera tout de même aussi complexe que nécessaire, si cette complexité permet de simplifier l'utilisation du produit.
-
-Du point de vue de l'utilisateur, l'archétype du fonctionnement simple, appréhendable, et reproductible consiste à respecter *le principe de "tout ou rien"*
 
 === Dépendances entre actions
 
@@ -26,7 +24,7 @@ Il existe toujours une dépendance entre les actions, et la séquence d'annulati
 
 [IMPORTANT]
 ====
-Il faut *annuler* une opération *fonctionnelle générale* si une opération *fonctionnelle particulière* est en erreur
+Il est préférable d'*annuler* une opération *fonctionnelle générale* si une opération *fonctionnelle particulière* est en erreur
 
 Il faut *annuler* une opération *fonctionnelle particulière* si une opération *technique sous-jascente* est en erreur
 
@@ -40,9 +38,9 @@ Donner le résultat attendu ou ne rien changer
 
 [IMPORTANT]
 ====
-Il faut *annuler toutes* les actions *précédemment réalisées* dont on est *responsable*
+Il faut *annuler toutes* les actions *précédemment réalisées* dont on est *responsable* en cas d'erreur
 
-Il faut *restaurer chaque élément modifié* à sa valeur *initiale*
+Il faut *restaurer chaque élément modifié* à sa valeur *initiale* en cas d'erreur
 ====
 
 De cette manière, on permet de garantir à l'utilisateur :
@@ -95,5 +93,5 @@ Les éléments externes (resources distantes, mémoires partagées ...) doivent 
 
 [IMPORTANT]
 ====
-Il faut *restaurer les éléments* et *signaler aux consommateurs* qu'un retour à l'état initial a eu lieu
+Il faut *restaurer les éléments externes* et *signaler aux consommateurs* qu'un retour à l'état initial a eu lieu
 ====

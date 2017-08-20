@@ -3,6 +3,7 @@
 :toclevels: 2
 :sectnums:
 :sectnumlevels: 10
+:nofooter:
 
 [abstract]
 Ce document a été réalisé dans le cadre spécifique d'un projet existant et des technologiques qu'il emploie, mais les préceptes qu'il présente restent pertinents ou adaptables à l'ensemble des applications informatiques quelles que soient les technologies utilisées

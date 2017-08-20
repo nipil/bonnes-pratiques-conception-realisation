@@ -1,7 +1,7 @@
 == Gestion d'erreurs
 
 [quote]
-Build to fail and fail nicely
+Build to fail, and fail nicely
 
 Dans la partie <<Validation systématique des données>> nous avons pu voir que la vérification des données entraîne soit une acceptation soit un rejet de celles-ci.
 
@@ -20,7 +20,7 @@ Ce découpage permettra de définir différentes consignes de rejet, décrites c
 
 === Rejet internes
 
-On appellera *composant interne* tout composant dont l'appel *utilise la même technique que l'appelant*. Par exemple : une requête web mappée sur une classe php, une classe qui lit un fichier, un script qui prend des arguments...
+On appellera *composant interne* tout composant dont l'appel *utilise la même technique que l'appelant*. Par exemple une fonction qui appelle une autre fonction, etc...
 
 ==== Bas niveau
 
@@ -33,7 +33,7 @@ Il faut *positionner des assertions* vérifiant les *valeurs* de *chaque paramè
 
 [IMPORTANT]
 ====
-Les assertions doivent être *actives sur l'ensemble des environnements* (dev, recette, pre-prod) pour détecter le plus grand nombre de problèmes, *à l'exception de la production* pour des raisons de performances
+Il faut *activer les assertions sur l'ensemble des environnements* (dev, recette, pre-prod) pour détecter le plus grand nombre de problèmes, *à l'exception de la production* pour des raisons de performances
 ====
 
 ==== Niveaux intermédiaires
@@ -44,12 +44,12 @@ L'outil de choix pour ces vérifications sont les *exceptions*.
 
 [IMPORTANT]
 ====
-Il *lever une exception* pour chaque *situation non gérée* ou *donnée incorrecte*
+Il faut *lever une exception* pour chaque *situation non gérée* ou *donnée incorrecte*
 ====
 
 [IMPORTANT]
 ====
-Il faut *varier les types* d'exception pour *permettre un traitement particulier* éventuel de chacune
+Il faut *varier les types* d'exception pour *permettre un traitement particulier* éventuel
 
 Il faut *regrouper hiérarchiquement* les exceptions pour *segmenter les couches* de middleware
 ====
@@ -90,7 +90,7 @@ On appellera *composant ouvert à l'extérieur* tout composant dont l'appel *né
 Il faut *systématiquement* remonter une information technique *condensée* pouvant *informer les machines* qu'une erreur *a eu lieu*
 ====
 
-Dans le cas d'un programme ou d'un script on définira *systématiquement* et *explicitement* un _code de retour_, respectant les principes UNIX (0 en cas de succès, non-zéro en cas d'erreur, et tant que faire se peut, on distinguera chaque cas d'erreur par un code de sortie différnt)
+Dans le cas d'un programme ou d'un script on définira *systématiquement* et *explicitement* un *code de retour*, respectant les principes UNIX (retourner zéro en cas de succès, non-zéro en cas d'erreur, et tant que faire se peut, on distinguera chaque cas d'erreur par un code de sortie différnt)
 
 Dans le cas d'une IHM, on affichera le code de retour dans la fenêtre d'erreur
 
@@ -117,6 +117,6 @@ Donner le résultat attendu, ou bien remonter le problème
 [IMPORTANT]
 ====
 Il faut arrêter tout traitement en cours, et rendre la main, lorsqu'une erreur survient
-
-Le seul cas où on doit fournir un résultat est le cas où tout s'est passé correctement
 ====
+
+Le seul et unique cas où on doit fournir un résultat, est le cas où tout s'est passé correctement

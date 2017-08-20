@@ -11,51 +11,94 @@ Dans la présente partie, nous aborderons *les traitements relatifs au rejet des
 
 Nous avons aussi vu qu'un projet, une application, un programme sont découpés en composants, et ces composants peuvent être de deux types :
 
-* des composants interragissant avec des éléments internes
-* des composants interragissant des éléments externes
+* des composants purement internes
+* des composants ouverts à l'extérieur
 ** dont ceux interagissant avec des composants externes "machine"
 ** dont ceux intéragissant avec des éléments externes "humains"
 
 Ce découpage permettra de définir différentes consignes de rejet, décrites ci-dessous
 
-=== Rejet dans les composants internes
+=== Rejet internes
 
-Au sein d'un composant interne et entre les composants internes, il y a certes un contrat, mais il est implicite et évolutif, _aussi longtemps que ce composant interne n'est pas publié ni réutilisé_. C'est le concepteur/réalisateur qui s'assure intellectuellement de la cohérence de l'ensemble.
+On appellera *composant interne* tout composant dont l'appel *utilise la même technique que l'appelant*. Par exemple : une requête web mappée sur une classe php, une classe qui lit un fichier, un script qui prend des arguments...
 
-Pour s'assurer de ce respect, il va utiliser les vérifications "faibles" qui visent à *vérifier "ce qui a déjà été vérifié"*, notamment du fait que ces vérifications internes seront généralement désactivées en production pour des raisons de performance. L'outil de choix pour ces vérifications faibles sont les *assertions*.
+==== Bas niveau
 
-[IMPORTANT]
-====
-Il faut *positionner des assertions vérifiant les *valeurs* de *chaque paramètre* de *chaque fonction*
-====
+Au sein d'un composant interne *de bas niveau*, on pourra utiliser des *vérifications faibles* qui visent à *éliminer les erreurs grossières* lors de la réalisation
 
 [IMPORTANT]
 ====
-Les assertions doivent être actives sur l'ensemble des environnements (DEV, RECETTES, INTEX) pour détecter le maximum de problèmes, mais ne doivent pas être actives en production pour des raisons de performances
+Il faut *positionner des assertions* vérifiant les *valeurs* de *chaque paramètre*
 ====
 
+[IMPORTANT]
+====
+Les assertions doivent être *actives sur l'ensemble des environnements* (dev, recette, pre-prod) pour détecter le plus grand nombre de problèmes, *à l'exception de la production* pour des raisons de performances
+====
 
+==== Niveaux intermédiaires
 
+Entre les composants internes, il faut *vérifier la cohérence de l'ensemble* et *informer les appelants* en cas de situation anormale.
 
-- une application génèrera des erreurs, qu'elle loggera et présentera à l'utilisateur, rejettera les données et arrêtera le traitement au plus tôt
-- un module applicatif interne génèrera une exception, loggera l'erreur, annulera les tâches en cours dont il a la responsabilité, et remontera l'exception à l'appelant, qui décidera du comportement à adopter face à l'erreur (en général, annulation)
-- au sein d'un même module, une fonction interne appelée par une autre fonction interne validera chaque paramètre à l'aide d'assertions
+L'outil de choix pour ces vérifications sont les *exceptions*.
 
+[IMPORTANT]
+====
+Il *lever une exception* pour chaque *situation non gérée* ou *donnée incorrecte*
+====
+
+[IMPORTANT]
+====
+Il faut *varier les types* d'exception pour *permettre un traitement particulier* éventuel de chacune
+
+Il faut *regrouper hiérarchiquement* les exceptions pour *segmenter les couches* de middleware
+====
+
+[IMPORTANT]
+====
+Une couche *supérieure* doit *attraper toutes les exceptions* des couches *inférieures*
+
+Une couche ne doit remonter *que* des exceptions *de son propre type*
+====
+
+Exemple d'un générateur de site web :
+
+* Consitution
+** Le _module principal_ utilise un _module de parsing_, un _module de transformation_, et un _module de sortie_
+** Les _modules de parsing_ et le _module de sortie_ utilisent un _module de gestion de fichiers_.
+* Exceptions
+** le module de gestion de fichier lève des sous classes de `FileExceptions`
+** le module de parsing lève des sous classes de `ParsingException`
+** le module de transformation lève des sous classes de `TransformException`
+** le module de sortie lève des sous classes de `OutputException`
+** le module principal lève des `GeneralException`
+* Application des consignes
+** le _module de parsing_ et le _module de sortie_ *doivent* attraper *toutes* les `FileExceptions`
+** le _modules général_ *doit* attraper *toutes* les `ParsingException`, `TransformException` et `OutputException`
+** chaque module *ne doit* remonter *que* ses *propres exceptions*
+** aucun module de niveau `N+2` *ne doit jamais* voir passer des exceptions d'un niveau `N`
+
+=== Rejet externes
+
+[quote]
+Be expressive about your failures
+
+On appellera *composant ouvert à l'extérieur* tout composant dont l'appel *nécessite une transition technique depuis l'appelant*. Par exemple : une requête web mappée sur une classe php, un script qui mappe sur une classe...
+
+[IMPORTANT]
+====
+Il faut *systématiquement* remonter une information technique *condensée* pouvant *informer les machines* qu'une erreur *a eu lieu*
+====
+
+[IMPORTANT]
+====
+Il faut pouvoir remonter une *information textuelle détaillée* pouvant *informer les éventuel humain* du *détail de l'erreur* qui a eu lieu
+====
 
 == Pénétration minimale
 
 [quote]
 Fail early
-
-
-
-
-
-== Rejet expressif
-
-[quote]
-Be expressive about your failures
-
 
 == Atomicité et idempotence
 
@@ -69,14 +112,15 @@ Cette logique vient du fait que _le travail du concepteur/réalisateur n'est ré
 En conséquence, un programme doit certes être aussi simple que possible, mais sera tout de même complexe, si cette complexité simplifie l'utilisation du produit.
 
 
+- une application génèrera des erreurs, qu'elle loggera et présentera à l'utilisateur, rejettera les données et arrêtera le traitement au plus tôt
+- un module applicatif interne génèrera une exception, loggera l'erreur, annulera les tâches en cours dont il a la responsabilité, et remontera l'exception à l'appelant, qui décidera du comportement à adopter face à l'erreur (en général, annulation)
+- au sein d'un même module, une fonction interne appelée par une autre fonction interne validera chaque paramètre à l'aide d'assertions
 
 
 
 
 Important :
 
-- les assertions doivent être actives pour tous les environnements, à l'exception de la production afin d'avoir la possibilité de détecter chaque erreur de conception.
-- dans tous les cas, les vérifications de type doivent être faites *avant* conversion automatique, et les vérifications de valeur/plages doivent être *après* conversion éventuelle
 - la vérification multiple d'une même donnée, au fur et à mesure de la chaîne d'appel, permet de garantir l'intégrité à tous les étages, à rester valide quelles que soient les évolutions, notamment à détecter rapidement et facilement les erreurs lors de refactorisations
 
 Exemple : pour un script S qui prend un argument numérique, qui appelle une web-service W, qui lui utilise une fonction F, le script S doit vérifier le fait que l'argument soit donné s'il est obligatoire, qu'il est de type entier, que la valeur est autorisée. Le web-service W doit effectuer la même vérification (type, valeur) car le script ne sera peut-être pas le seul point d'entrée du web-service. La fonction F doit effectuer la même vérification (type, valeur) pour les mêmes raisons.

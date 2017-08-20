@@ -1,16 +1,18 @@
 = Gestion d'erreurs
 
 [quote]
-Build to fail, and fail nicely
+Build to fail and fail nicely
 
-Dans la partie <<Validation systématique des données>> nous avons pu voir que la vérification des données entraîne soit une acceptation soit un rejet. Dans la présente partie, nous aborderons *les traitements relatifs au rejet des données*.
+Dans la partie <<Validation systématique des données>> nous avons pu voir que la vérification des données entraîne soit une acceptation soit un rejet de celles-ci.
+
+Dans la présente partie, nous aborderons *les traitements relatifs au rejet des données*.
 
 == Différentes politiques de rejet
 
 Nous avons aussi vu qu'un projet, une application, un programme sont découpés en composants, et ces composants peuvent être de deux types :
 
-* des composants internes interragissant avec des éléments internes
-* des composants internes interragissant des éléments externes
+* des composants interragissant avec des éléments internes
+* des composants interragissant des éléments externes
 ** dont ceux interagissant avec des composants externes "machine"
 ** dont ceux intéragissant avec des éléments externes "humains"
 
@@ -18,13 +20,13 @@ Ce découpage permettra de définir différentes consignes de rejet, décrites c
 
 === Rejet dans les composants internes
 
-Au sein d'un composant interne il y a certes un contrat, mais il est implicite et évolutif, _aussi longtemps que ce composant interne n'est pas publié ni réutilisé_. C'est le concepteur/réalisateur qui s'assure intellectuellement de la cohérence de l'ensemble.
+Au sein d'un composant interne et entre les composants internes, il y a certes un contrat, mais il est implicite et évolutif, _aussi longtemps que ce composant interne n'est pas publié ni réutilisé_. C'est le concepteur/réalisateur qui s'assure intellectuellement de la cohérence de l'ensemble.
 
 Pour s'assurer de ce respect, il va utiliser les vérifications "faibles" qui visent à *vérifier "ce qui a déjà été vérifié"*, notamment du fait que ces vérifications internes seront généralement désactivées en production pour des raisons de performance. L'outil de choix pour ces vérifications faibles sont les *assertions*.
 
 [IMPORTANT]
 ====
-Il faut valider les valeurs de chaque paramètre de chaque fonction par une assertion (quand c'est possible)
+Il faut *positionner des assertions vérifiant les *valeurs* de *chaque paramètre* de *chaque fonction*
 ====
 
 [IMPORTANT]

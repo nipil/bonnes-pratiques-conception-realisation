@@ -218,17 +218,30 @@ Conséquences :
 * alors qu'avec les noms, on comprend tout de suite à quelle zone on fait référence, et si le décallage de l'heure d'été est appliquée ou pas
 ====
 
-=== Valeur
+=== Valeurs
+
+[quote]
+Le nécessaire n'est pas suffisant
 
 Les étapes précédentes correspondent à une *validation technique*, qui consiste à vérifier que les données sont *bien formées*, avant conversion et en amont de toute utilisation.
 
 Il est ensuite possible de réaliser une *validation fonctionnelle* sur les valeurs possibles pour le type attendu.
 
+Bien sûr, en l'absence de consignes fournies, il est envisageable de ne pas faire de validation fonctionnelle. Cependant, il est bien plus productif d'engager une réflexion ou un dialogue visant à *établir* ces éléments de cadrage cadrage.
+
+[IMPORTANT]
+====
+Il faut essayer d'*établir les limites fonctionnelles* pertinentes _si elles ne sont pas connues ou fournies_
+====
+
 [IMPORTANT]
 ====
 Il faut vérifier que les *valeurs* sont *comprises* dans les *plages* ou *ensembles* attendus
+====
 
-Cette vérification doit avoir lieu *après* toute phase de conversion éventuellement nécessaire aux vérifications ultérieures
+[IMPORTANT]
+====
+Cette vérification doit avoir lieu *après* toute phase de conversion
 ====
 
 Les questions à se poser lors de la validation des valeurs :
@@ -244,4 +257,3 @@ Quelques exemples de contraintes fonctionnelles typiques :
 * un indice (en PHP), un compteur, une température (une fois convertie en Kelvin), une durée de timeout, un nombre d'essais, doivent tous être positifs ou nuls
 * nombre de threads à lancer au démarrage d'un process appartient à la plage [5-20]
 * un élément XML doit être un fils/frère d'un autre élément
-* ...

@@ -90,7 +90,21 @@ On appellera *composant ouvert à l'extérieur* tout composant dont l'appel *né
 Il faut *systématiquement* remonter une information technique *condensée* pouvant *informer les machines* qu'une erreur *a eu lieu*
 ====
 
+Dans le cas d'un programme ou d'un script on définira *systématiquement* et *explicitement* un _code de retour_, respectant les principes UNIX (0 en cas de succès, non-zéro en cas d'erreur, et tant que faire se peut, on distinguera chaque cas d'erreur par un code de sortie différnt)
+
+Dans le cas d'une IHM, on affichera le code de retour dans la fenêtre d'erreur
+
+Dans le cas d'une API ou d'un webservice, on retournera le code d'erreur à l'appelant en tant que données de la réponse, ou dans l'enveloppe de la réponse (selon le protocole utilisé)
+
+Dans tous les cas, on prendra soin de logguer aussi ce code de retour dans le cas où une fonctionnalité de log est disponible
+
 [IMPORTANT]
 ====
 Il faut pouvoir remonter une *information textuelle détaillée* pouvant *informer les éventuel humain* du *détail de l'erreur* qui a eu lieu
 ====
+
+Dans le cas d'un *programme*, d'un *script*, ou d'une *IHM*, on *affichera* systématiquement le message d'erreur signalé
+
+Dans le cas d'une *API* le message d'erreur _n'est pas obligatoire_ (car il ne sert normalement qu'au développeur) : s'il est disponible, on le *retransmettra à l'appelant* en tant que *données de la réponse*, ou dans l'enveloppe de la réponse (selon le protocole utilisé)
+
+Dans tous les cas, on prendra soin de logguer aussi ce message retour dans le cas où une fonctionnalité de log est disponible

@@ -33,6 +33,10 @@ Le document restera cependant général : chaque point abordé sera expliqué, u
 
 Chaque partie abordera un ensemble de problèmes, avec des sections dédiées et progressives pour le traitment de chaque point thématique relevant de cette classe de problèmes.
 
+=== Synthèse
+
+Au delà des explications et des exemples présents dans chaque section, l'ensemble des consignes à respecter se trouvent dans les blocs "importants", qui sont l'essence de ce document
+
 === Évolution
 
 Bien sûr, ce document a vocation à évoluer, pour aborder de nouvelles thématiques, ou améliorer les solutions proposées, en fonction de nos expériences, et des suggestions qui seront faites.

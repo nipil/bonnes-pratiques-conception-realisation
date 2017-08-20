@@ -13,4 +13,4 @@ include::validation.adoc[]
 
 include::erreurs.adoc[]
 
-include::todo.adoc[]
+include::atomicite.adoc[]

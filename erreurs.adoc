@@ -108,3 +108,15 @@ Dans le cas d'un *programme*, d'un *script*, ou d'une *IHM*, on *affichera* syst
 Dans le cas d'une *API* le message d'erreur _n'est pas obligatoire_ (car il ne sert normalement qu'au développeur) : s'il est disponible, on le *retransmettra à l'appelant* en tant que *données de la réponse*, ou dans l'enveloppe de la réponse (selon le protocole utilisé)
 
 Dans tous les cas, on prendra soin de logguer aussi ce message retour dans le cas où une fonctionnalité de log est disponible
+
+=== Comportement attendu
+
+[quote]
+Donner le résultat attendu, ou bien remonter le problème
+
+[IMPORTANT]
+====
+Il faut arrêter tout traitement en cours, et rendre la main, lorsqu'une erreur survient
+
+Le seul cas où on doit fournir un résultat est le cas où tout s'est passé correctement
+====

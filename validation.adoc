@@ -26,6 +26,8 @@ Il est aisé de se dire aussi que dans 99% des cas, on aura pas de problème, et
 
 On peut par contre aussi considérer que *la mise en place de vérification est drastiquement réduit s'il est fait au fil de l'eau*, de manière systématique : *on profite directement des bénéfices*.
 
+En effet, la vérification au fur et à mesure de la chaîne d'appel permet de garantir la cohérence quelle que soient les évolutions, et aide à détecter rapidement et facilement les erreurs et oublis lors de refactorisations et des nouvelles conceptions.
+
 === Le périmètre
 
 Une application est segmentée en composants (techniques, fonctionnels, systèmes, applicatifs, internes, externes...)

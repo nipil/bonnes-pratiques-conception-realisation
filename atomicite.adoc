@@ -1,0 +1,99 @@
+== Atomicité et idempotence
+
+[quote]
+Fais exactement ce qui doit être fait, ou ne fait rien du tout
+
+=== Simplicité pour l'utilisateur
+
+Ce principe est issu d'un paradigme de *simplicité*, mais appliqué à la personne qui trouve son intérêt dans l'*utilisation* du produit. Le raisonnement est le suivant :
+
+* le produit est là pour servir les intérêts _de l'utilisateur_, et non ceux du concepteur/réalisateur
+* le travail de l'_utilisateur_ est possiblement _répétable_ et doit être aussi _simple_ que possible
+* le travail du _concepteur/réalisateur_ n'est réalisé qu'_une seule fois_ et est _complexe_ par nature
+
+[IMPORTANT]
+====
+Il faut *simplifier le travail de l'utilisateur*, même si cela a pour effet de *complexifier le travail du concepteur/réalisateur*
+====
+
+En conséquence, un programme doit certes être aussi simple que possible (pour être maintenable) mais sera tout de même aussi complexe que nécessaire, si cette complexité permet de simplifier l'utilisation du produit.
+
+Du point de vue de l'utilisateur, l'archétype du fonctionnement simple, appréhendable, et reproductible consiste à respecter *le principe de "tout ou rien"*
+
+=== Dépendances entre actions
+
+Il existe toujours une dépendance entre les actions, et la séquence d'annulation doit respecter ces dépendances
+
+[IMPORTANT]
+====
+Il faut *annuler* une opération *fonctionnelle générale* si une opération *fonctionnelle particulière* est en erreur
+
+Il faut *annuler* une opération *fonctionnelle particulière* si une opération *technique sous-jascente* est en erreur
+
+Il faut *annuler* une opération *technique générale* si une opération *technique particulière* est en erreur
+====
+
+=== Retour à l'état initial
+
+[quote]
+Donner le résultat attendu ou ne rien changer
+
+[IMPORTANT]
+====
+Il faut *annuler toutes* les actions *précédemment réalisées* dont on est *responsable*
+
+Il faut *restaurer chaque élément modifié* à sa valeur *initiale*
+====
+
+De cette manière, on permet de garantir à l'utilisateur :
+
+* qu'une action ayant causé une erreur n'a pas laissé de traces indésirables
+* que si l'état initial reste le même, répéter la même action donnera le même résultat
+
+==== Fichiers
+
+[IMPORTANT]
+====
+Il faut *supprimer* chaque fichier *créé* avant l'erreur
+
+Il faut *restaurer* chaque fichier *supprimé* ou *modifié* avant l'erreur
+====
+
+Pour faciliter cette opération, il est utile de :
+
+* renommer (ou déplacer) temporairement les fichiers ayant vocation à être supprimés
+* sauvegarder les fichiers avant modification
+
+==== Base de données
+
+[IMPORTANT]
+====
+Il faut *effectuer un rollback* sur chaque *transaction* liée à l'opération
+====
+
+Dans le cas d'opérations séquentielles, il est utile de définir un *checkpoint* en *début de chaque opération* pour rendre le retour arrière *incrémental*. De cette manière, il devient possible d'annuler _la seule partie dont on a la responsabilité_, et de laisser _l'appelant décider du sort de l'opération globale_.
+
+==== Variables
+
+Dans le cas spécifique des variables passées par référence, ou des variables globales, une restauration doit être prévue
+
+[IMPORTANT]
+====
+Il faut restaurer les valeurs initiales des variables passées par référence
+
+Il faut restaurer les valeurs initiales des variables globales
+====
+
+Pour ce faire, il est utile de :
+
+* *sauvegarder* les variables globales *avant modification*
+* *modifier* les variables passées par références *juste avant de quitter la fonction*
+
+==== Éléments externes
+
+Les éléments externes (resources distantes, mémoires partagées ...) doivent eux aussi être remis à leur état initial
+
+[IMPORTANT]
+====
+Il faut *restaurer les éléments* et *signaler aux consommateurs* qu'un retour à l'état initial a eu lieu
+====

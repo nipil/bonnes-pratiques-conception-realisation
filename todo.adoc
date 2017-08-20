@@ -22,46 +22,6 @@ maintenir la cohérence entre comportement et sémantique
 
 Exemple: si un script redémarre (restart) un daemon, ne pas l'appeler reload (qui recharger habituellement la configuration sans redémarrer)
 
-== Intégrité et atomicité des opérations
-
-[quote]
-Donnez le résultat attendu, ou bien remontez les problèmes
-
-Ce principe est issu d'un paradigme de *simplicité pour l'humain* : l'informatique est là pour simplifier la gestion, pas pour la complexifier. En conséquence, il faut toujours *simplifier le travail de l'utilisateur, même si c'est au détriment du travail du concepteur/réalisateur*.
-
-Cette logique vient du fait que _le travail du concepteur/réalisateur n'est réalisé qu'une seule fois et est complexe par nature_, alors que _le travail de l'utilisateur est possiblement répétable et doit être aussi simple que possible_.
-
-En conséquence, un programme doit certes être aussi simple que possible, mais sera tout de même complexe, si cette complexité simplifie l'utilisation du produit.
-
-
-
-
-
-
-Consigne :
-
-- toute erreur fonctionnelle particulière doit annuler l'opération fonctionnelle globale
-- toute erreur technique doit annuler l'opération fonctionnelle en cours
-- toute erreur technique particulière doit annuler l'opération technique globale
-- si une opération est annulée durant son exécution, l'ensemble du travail réalisé doit l'être aussi
-
-Exemple: arrêt gracieux des moteurs entre 2 itérations
-
-
-- une application génèrera des erreurs, qu'elle loggera et présentera à l'utilisateur, rejettera les données et arrêtera le traitement au plus tôt
-- un module applicatif interne génèrera une exception, loggera l'erreur, annulera les tâches en cours dont il a la responsabilité, et remontera l'exception à l'appelant, qui décidera du comportement à adopter face à l'erreur (en général, annulation)
-- au sein d'un même module, une fonction interne appelée par une autre fonction interne validera chaque paramètre à l'aide d'assertions
-
-
-
-
-Important :
-
-- la vérification multiple d'une même donnée, au fur et à mesure de la chaîne d'appel, permet de garantir l'intégrité à tous les étages, à rester valide quelles que soient les évolutions, notamment à détecter rapidement et facilement les erreurs lors de refactorisations
-
-Exemple : pour un script S qui prend un argument numérique, qui appelle une web-service W, qui lui utilise une fonction F, le script S doit vérifier le fait que l'argument soit donné s'il est obligatoire, qu'il est de type entier, que la valeur est autorisée. Le web-service W doit effectuer la même vérification (type, valeur) car le script ne sera peut-être pas le seul point d'entrée du web-service. La fonction F doit effectuer la même vérification (type, valeur) pour les mêmes raisons.
-
-
 == Données et métadonnées
 
 "Les données doivent être complètement définies"
@@ -136,7 +96,6 @@ chaque élément contrôle son environnement d'exécution : si un hy doit gérer
 
 == vrac
 
-good software doest what is told, great software does only what it is supposed to + le nécessaire n'est pas suffisant
 purge avant déploiement
 contrôles sur les sorties (design by contract), but tester les overload et conversions auto int=>float
 KISS = si c'est compliqué à expliquer, c'est probablement une mauvaise idée
@@ -149,8 +108,6 @@ fragmentation des fichiers (app.js) => réutilisation
 async js (fail graciously)
 le bon outil => importprojet.php car sh=systeme, php=appli : transact over everything, stop on err
 la concurrence existe de fait et doit être gérée (IHM: mm single user, multitab ; script lancé plusieurs fois ; manual + batch)
-verifier type intermédiaires des variables de sortie
-set des params par ref juste avant de return, pour cancel plus facile en cas d'early return
 clean et reinstall auto complete from scratch
 prévoir des mécanismes d'override de livrables plutôt que de modifier les fichiers livrés
 commit souvent pour commit minimal

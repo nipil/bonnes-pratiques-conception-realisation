@@ -284,3 +284,52 @@ En conséquence, on prendra soin (entre autres) de :
 * vérifier les *fichiers* de données *dès qu'ils seront désignés*
 * vérifier les *URL* dès le routeur
 * vérifier les *données* et les *paramètres* des requêtes dès le *contrôleur*
+
+=== Progressivité
+
+Sur un ensemble d'éléments et pour un ensemble de vérification, deux stratégies sont possibles : itérative par élément, ou par lot
+
+L'intérêt de la vérification par lot, est que pour l'utilisateur, _il est plus facile de comprendre et analyser un ensemble progressif de "blocs"_ (3 étapes sur 10 éléments) _qu'une suite fragmentée_ (10 fois une série de 3 étapes)
+
+[IMPORTANT]
+====
+Une vérification par lot est préférable à un une vérification itérative
+====
+
+Ci-après une description appliquée des deux stratégies
+
+==== Itérative
+
+* pour chaque fichier, on vérifie
+** l'existence
+** le format
+** les valeurs
+
+La gestion d'erreur se fait de la manière suivante :
+
+* on bouclera sur l'ensemble des éléments
+* lorsqu'un vérification échoue pour un élément, on n'effectuera pas d'autres vérifications _sur cet élément_
+* *on continuera* les vérifications sur les autres éléments
+* à la fin, s'il y a eu une quelconque erreur, on arrête le traitement avec un message synthétique
+
+==== Allotie
+
+On fera progresser un lot au fur et à mesure des étapes :
+
+* on vérifie l'existence de chaque élément
+* on vérifie le format de chaque élément
+* on vérifie les valeurs de chaque élément
+
+La gestion d'erreur se fera de la manière suivante :
+
+* dès qu'une erreur est constatée :
+** on _retirera cet élément du lot_ pour les étapes suivantes
+** *on continuera* les vérifications avec les autres éléments du lot
+* on *continuera* les autres étapes avec les *éléments restants*
+* à la fin, s'il y a eu une quelconque erreur, on arrête le traitement avec un message synthétique
+
+==== Continuation
+
+Dans les deux stratégies ci-dessus, j'ai pris le parti de continuer les vérifications, au lieu de s'arrêter à la première erreure rencontrée.
+
+Ceci est fait dans le but de faciliter le travail de l'utilisateur, et de lui remonter *un maximum d'erreurs*, tant qu'elles sont *structurellement indépendantes*, afin qu'il puisse toutes les corriger en une seule passe, au lieu d'être contraint à corriger une erreur, relancer le traitement, voir une autre erreur, etc...

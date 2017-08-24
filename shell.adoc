@@ -1,0 +1,102 @@
+== Scripts shell
+
+[quote]
+A one line script is not a script that is production-ready
+
+=== Quel interprêteur ?
+
+Sachant :
+
+* qu'un script shell peut utiliser l'une ou l'autre syntaxe de shell (`bash`, `dash`, `ksh`, `csh`... ou bien pur POSIX)
+* qu'une distribution pourra choisir d'utiliser l'un ou l'autre comme son interprêteur par défaut (`sh`)
+
+[IMPORTANT]
+====
+Il faut savoir *identifier* à quel syntaxe appartiennent les mots clés et fonctions utilisées
+====
+
+[IMPORTANT]
+====
+Il faut *expliciter l'interprêteur utilisé*, afin d'assurer la portabilité et pour indiquer à l'utilisateur quelle syntaxe utiliser pour les corrections et ajouts éventuels
+====
+
+[IMPORTANT]
+====
+Il *ne faut spécifier `sh`* que si on *garanti* le fait que l'ensemble de la syntaxe est *compatible POSIX*
+====
+
+=== Sépareration des commandes
+
+[IMPORTANT]
+====
+Il faut séparer chaque commande (ou presque) afin de permettre de détecter les erreurs et de les gérer de manière flexibles, fiables et intelligibles
+====
+
+Ce précepte est issu des constats suivant :
+
+* en cas d'erreur, pour savoir quoi faire, un script ne dispose que :
+** du code de retour
+** de la sortie standard éventuellement capturée
+** de la sortie d'erreur éventuellement capturée
+* et lorsqu'une chaine de commande est exécutée :
+** les I/O standards ne sont pas capturables
+** les codes de retour sont gérés par la chaîne de commande
+
+Exemple pour la commande "simple" suivante :
+
+[source,bash]
+----
+find ${CHEMIN} | grep -f filter.txt | sed -e 'script' | xargs rm
+----
+
+Les cas d'erreur possible (non exaustifs !) :
+
+* si `find` échoue car un des répertoire constituant ${CHEMIN} n'est pas explorable (ie n'existe pas, ou bien pas de `x` dans les permissions), alors find échouera avec une erreur non zéro, et la chaine de commande s'arrêtera là
+
+* si `grep` échoue
+** soit car le fichier de filtre n'existe pas ou n'est pas lisible des répertoire constituant ${CHEMIN} n'est pas explorable (ie n'existe pas, ou bien pas de `x` dans les permissions), alors find échouera avec une erreur non zéro, et la chaine de commande s'arrêtera là
+** soit il renvoie aussi non-zéro car rien n'a matché
+
+* si `sed` échoue parce qu'il y a une erreur dans l'exécution du script
+
+* si l'une ou l'autre partie du rm sur les fichiers échoue, rm renverra non-zéro
+
+Dans tous les cas, *une fois la chaine exécutée, il est impossible de déterminer au sein du script quelle partie de la commande a causé l'echec et pour quelle raison*.
+
+En conséquence, une autre formulation de cette commande serait à privilégier :
+
+[source,bash]
+----
+TODO
+----
+
+Cette version est certes plus verbeuse, mais bien plus robuste et exploitable : *on faciliter la vie de l'utilisateur* et on *gagner en précision* lors des incidents.
+
+=== TODO
+separer get et actions
+locale
+check every return & message
+use vars in function
+set variable at start
+allow config via params
+parse params with getopts
+use functions for reuse
+use local/typeset in functions for clean namespace
+return values from function
+check every exit code
+split command chains
+utiliser ${AZE} plutôt que $AZE à cause de ce qui suit
+
+aucun élément ne doit être hard-codé
+
+ssh batch mode pour interdire le prompt qui hang la connexion
+ssh pre-test connexion avant commande pour retour erreur
+ssh multi commande => 1 série de cmd plutôt qu'une série de ssh, préférer invoc un script distant copié à l'avance quand la logique devient complexe
+
+===
+scope des variables
+surcharge éventuelle pour les éléments non paramétrables pour éviter les modification
+vérification des code de retour
+segmentation en commandes unitaires plutôt qu'en chaine
+factoriser le code en fonction
+factoriser le code en librairies

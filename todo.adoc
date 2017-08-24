@@ -75,16 +75,6 @@ ajouter un maximum de contraintes permettant de valider les valeurs des données
 == portabilité
 
 aucun élément ne doit être hard-codé
-posix ou spécifique (si bash, alors bash)
-
-== scripts
-
-scope des variables
-surcharge éventuelle pour les éléments non paramétrables pour éviter les modification
-vérification des code de retour
-segmentation en commandes unitaires plutôt qu'en chaine
-factoriser le code en fonction
-factoriser le code en librairies
 
 == concurrence et parallèlisme
 

@@ -15,3 +15,5 @@ include::validation.adoc[]
 include::erreurs.adoc[]
 
 include::atomicite.adoc[]
+
+include::shell.adoc[]

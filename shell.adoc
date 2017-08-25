@@ -12,24 +12,18 @@ Sachant :
 
 [IMPORTANT]
 ====
-Il faut savoir *identifier* à quel syntaxe appartiennent les mots clés et fonctions utilisées
-====
+Il faut savoir *identifier quel syntaxe* est utilisée par le script
 
-[IMPORTANT]
-====
 Il faut *expliciter l'interprêteur utilisé*, afin d'assurer la portabilité et pour indiquer à l'utilisateur quelle syntaxe utiliser pour les corrections et ajouts éventuels
-====
 
-[IMPORTANT]
-====
 Il *ne faut spécifier `sh`* que si on *garanti* le fait que l'ensemble de la syntaxe est *compatible POSIX*
 ====
 
-=== Sépareration des commandes
+=== Séparation des commandes
 
 [IMPORTANT]
 ====
-Il faut séparer chaque commande (ou presque) afin de permettre de détecter les erreurs et de les gérer de manière flexibles, fiables et intelligibles
+Il faut *séparer chaque commande* pour pouvoir *détecter chaque erreur*
 ====
 
 Ce précepte est issu des constats suivant :
@@ -61,18 +55,81 @@ Les cas d'erreur possible (non exaustifs !) :
 
 * si l'une ou l'autre partie du rm sur les fichiers échoue, rm renverra non-zéro
 
-Dans tous les cas, *une fois la chaine exécutée, il est impossible de déterminer au sein du script quelle partie de la commande a causé l'echec et pour quelle raison*.
+Du coup, *une fois la chaine exécutée*, il est *impossible de déterminer* au sein du script *quelle partie* de la commande a *causé l'echec*
 
 En conséquence, une autre formulation de cette commande serait à privilégier :
 
 [source,bash]
 ----
-TODO
+FILES=$(find ${CHEMIN})
+[[ ${?} -eq 0 ]] || { echo "ERREUR: Problème lors de la recherche de fichiers"; return 1; }
+
+[[ -n "${FILES}" ]] || { echo "DEBUG: pas de fichiers trouvés"; return 0; }
+
+MATCHES=$(grep -f filter.txt ${FILES})
+case ${?} in
+    0) ;;
+    1) echo "DEBUG: Pas de match trouvés"; return 0 ;;
+    *) echo "ERREUR: Problème lors de la recherche de motifs"; return 1 ;;
+esac
+
+FILES=$(echo "${MATCHES}" | sed -e 'script')
+[[ ${?} -eq 0 ]] || { echo "ERREUR: Problème lors de la transformation"; return 1; }
+
+[[ -n "${FILES}" ]] || { echo "DEBUG: Aucun fichier à supprimer"; return 0; }
+
+rm ${FILES}
+[[ ${?} -eq 0 ]] || { echo "ERREUR: Problème lors de la suppression de fichiers"; return 1; }
 ----
 
-Cette version est certes plus verbeuse, mais bien plus robuste et exploitable : *on faciliter la vie de l'utilisateur* et on *gagner en précision* lors des incidents.
+Cette version est certes plus verbeuse, et elle a pris un peu plus de temps à réaliser, mais elle surtout bien *plus robuste et exploitable*.
+
+Par exemple, le jour où "ça ne marche plus" parce qu'un `chmod -X` a été mal fait, ou parce qu'on ajouté un motif qui ne compile pas à la list blanche, _l'utilisateur_ saura exactement _quelle opération a planté_ : il pourra plus facilement comprendre et résoudre le problème par lui même,  sans besoin de remonter aux référents.
+
+Encore une fois, *on facilite la vie de l'utilisateur* et on *gagne en précision et en rapidité* lors des diagnostics de problèmes, ce qui entraîne un gain de temps et une hausse de la confiance envers le produit.
+
+=== Factorisation et réutilisation
+
+Il est extrêmement facile de transposer chaque opération (cf l'exemple de la section <<Séparation des commandes>>) en une fonction paramétrable, qui vérifie les paramètres, exécute la commande, log et vérifie les erreurs après exécution.
+
+[IMPORTANT]
+====
+Il faut *factoriser le code de gestion d'erreur* et de logging pour permettre une réutilisation simple
+====
+
+Par exemple pour l'opération "find" :
+
+[source,bash]
+----
+function _find {
+    local __CHEMIN __RESULT
+
+    __CHEMIN=${1}
+    [[ -n "${__CHEMIN}" ]] || _show_log_err "Le chemin est nécessaire"; return 1; }
+
+    shift
+
+    __RESULT=$(find ${__CHEMIN} "${@}")
+    [[ ${?} -eq 0 ]] || { _show_log_err "Problème lors de la recherche"; return 1; }
+
+    echo "${__RESULT}"
+    return 0
+}
+----
+
+Qu'on pourra utiliser aussi simplement que qu'habituellement :
+
+[source,bash]
+----
+_find /tmp -type f | grep toto
+----
+
+L'avantage de cette démarche, est qu'on a une *gestion automatique et transparente* de *tous* les *cas d'erreur* pouvant survenir quand on utilise cette commande standard.
+
+On peut alors *constituer une librairie de fonction* qu'on pourra *ré-utiliser* dans n'importe quel script, avec une *gestion homogène* des erreurs.
 
 === TODO
+
 separer get et actions
 locale
 check every return & message

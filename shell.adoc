@@ -1,7 +1,33 @@
 == Scripts shell
 
 [quote]
-A one line script is not a script that is production-ready
+Un "script en une ligne" n'est pas un script de production (à de rares exceptions)
+
+=== Script, programme, application ?
+
+[quote]
+Un "script de 100+ lignes" n'est pas un script : c'est un programme
+Un "script de 1000+ lignes" n'est pas un script : c'est une application
+
+[IMPORTANT]
+====
+Il faut reduire l'utilisation des scripts shell aux cas les plus simples, et privilégier à la place un programme basé sur un language riche dans les autres cas
+====
+
+Il manque aux scripts shell la clarté et surtout la robustesse nécessaire pour faire "plus".
+
+Un script shell est très adapté pour créer des "lanceurs de commande", par exemple : définir quelques variables d'environnement, passer un lot de paramètres pré-définis, alimenter les entrées et rediriger ou dupliquer les sorties
+
+En effet, il manque aux scripts le contrôle simple du flux d'exécution (la pile d'appel + le confort des exceptions), la détection d'erreurs habituelles (utilisation d'une variable non définie), les structures de données "au delà de la clé-valeur" sont fastidieuses
+
+Il est estimé qu'à _robustesse et contrôles égaux_, un script shell est environ 50% plus volumineux qu'un programme utilisant une technologie plus robuste, ce qui augmente la complexité de la maintenance, et de la lecture
+
+L'avantage des shell, c'est que toute machine POSIX en dispose d'au moins un, ainsi que de PERL. Sous Linux il y quasiment toujours PYTHON, et il est toujours possible d'installer PHP, Java ... Il faut choisir les outils les plus adaptés à la tâche en cours
+
+[IMPORTANT]
+====
+S'il existe une contrainte technologique (obligation) ou pragmatique (maintenance de l'existant) pour continuer à utiliser un script shell, se référer aux sections suivante
+====
 
 === Quel interprêteur ?
 
@@ -78,7 +104,7 @@ FILES=$(echo "${MATCHES}" | sed -e 'script')
 
 [[ -n "${FILES}" ]] || { echo "DEBUG: Aucun fichier à supprimer"; return 0; }
 
-rm ${FILES}
+\rm ${FILES}
 [[ ${?} -eq 0 ]] || { echo "ERREUR: Problème lors de la suppression de fichiers"; return 1; }
 ----
 
@@ -87,6 +113,21 @@ Cette version est certes plus verbeuse, et elle a pris un peu plus de temps à r
 Par exemple, le jour où "ça ne marche plus" parce qu'un `chmod -X` a été mal fait, ou parce qu'on ajouté un motif qui ne compile pas à la list blanche, _l'utilisateur_ saura exactement _quelle opération a planté_ : il pourra plus facilement comprendre et résoudre le problème par lui même,  sans besoin de remonter aux référents.
 
 Encore une fois, *on facilite la vie de l'utilisateur* et on *gagne en précision et en rapidité* lors des diagnostics de problèmes, ce qui entraîne un gain de temps et une hausse de la confiance envers le produit.
+
+=== Vérification systématique
+
+[IMPORTANT]
+====
+Il faut *vérifier les code de sortie* spécifiques à chaque commande
+====
+
+La norme POSIX indique qu'un code de sortie `0` signifie "pas d'erreur", et qu'une erreur a eu lieu s'il n'y a pas eu d'erreur.
+
+Se créer une fonction `expect_exit VALEUR` qui teste que `${?}` vaut bien VALEUR, permet de vérifier chaque étape.
+
+Attention aux programmes particuliers (GNU find par exemple) qui renvoie `0` si quelque chose a été trouvé, `1` si rien n'a été trouvé, et `2` si une erreur a été rencontrée
+
+D'autres programmes mal conçus ne renvoient pas de code d'erreur en cas de problème, il faut alors trouver une autre manière de détecter les erreurs, et factoriser la solution dans une fonction
 
 === Factorisation et réutilisation
 
@@ -128,21 +169,86 @@ L'avantage de cette démarche, est qu'on a une *gestion automatique et transpare
 
 On peut alors *constituer une librairie de fonction* qu'on pourra *ré-utiliser* dans n'importe quel script, avec une *gestion homogène* des erreurs.
 
-=== TODO
+=== Invoquer les commandes de manière stable
 
-separer get et actions
-locale
-check every return & message
-use vars in function
-set variable at start
-allow config via params
-parse params with getopts
-use functions for reuse
-use local/typeset in functions for clean namespace
-return values from function
-check every exit code
-split command chains
+[quote]
+Les commandes qu'on "tape" ne sont pas des commandes adéquates pour les scripts
+
+[IMPORTANT]
+====
+Il faut *choisir les commandes* ayant les interfaces *les plus stables*, et les invoquer de manière à *réduire les adaptations* dans le temps
+
+* Préférer les informations issues de `/proc` et `/sys` plutôt que des commandes qui ne font que récupérer ces informations et les reformater "pour les humains"
+
+* Préférer les commandes ayant un formattage fixe ou absolument paramétrable (tel que `find -printf`, `stat`) aux commandes habituelle (`ls` et toutes ses options) et pareil pour `find -delete` en remplacement de `rm`
+====
+
+Un script shell invoque un grand nombre de commandes, et il est habituel d'utiliser _dans un script_ les mêmes commandes que celles qu'un être humain passerait interactivement, ce qui se révèle être une source de problèmes, alors qu'il y a toujours plusieurs manières de faire la même chose
+
+La majorité des programmes POSIX sont compatibles avec les librairies multi-lingues, et leurs sorties sont adaptées à la configuration du terminal (local ou distant) de l'utilisateur invoquant la commande (ou du script qui l'invoque)
+
+Ils tiennent compte de la *locale* et de l'*encodage*, et/ou du fait que le terminal soit interactif (`tty` ou non)
+
+Par exemple ils peuvent modifier le format de date. Et cerise sur le gâteau, ces programmes évoluent, ce qui fait que leur format d'entrées et sorties évoluent et que les scripts les utilisant doivent s'adapter
+
+=== Les `alias`
+
+[quote]
+Tenir compte de la personnalisation de l'environnement
+
+[IMPORTANT]
+====
+Il faut invoquer chaque commandes "habituelles" avec un _backslash_ en tête, afin de court-circuiter les éventuels alias utilisateur qui modifieraient le comportement
+====
+
+Le shell `bash` (entre autres) permet de définir des alias, qui modifient la commande passée, en remplaçant. Par exemple, CentOS positionne un alias `rm='rm -i'` pour le compte root, ce qui fait que tout script utilisant `rm` serait obligé de passer l'option `-f` pour éviter le prompt
+
+Sauf que `-f` rend aussi silencieux et aucune erreur ne sera affichée, et force le code de sortie à zéro, ce qui fait qu'aucune erreur ne peut être détecte
+
+Une première solution est d'invoquer `\rm`, ce qui ignore les éventuels alias
+
+Une autre solution est d'utiliser `\find ... -delete` permet aussi une suppression beaucoup plus contrôlée
+
+=== Variables locales et globales
+
+[IMPORTANT]
+====
+Il faut réduire le scope des variables et rendre leur noms intelligibles
+====
+
+En l'absence de précision, toute variable shell est globale, ce qui n'est pas une bonne pratique. Utiliser le mot-clé `local` dans les `function`s BASH pour définir une variable locale, ou le mot clé `typeset` en KSH
+
+Spécialiser leur nom en le préfixant d'un double _underscore_ pour faciliter la différenciation entre variables locales et globales.
+
+Récupérer les arguments passés (au script et aux fonctions) dans des variables aux noms maîtriséspour une meilleure intelligibilité
+
+.TEXT est global, __CHEMIN et __RESULT sont locales
+----
+TEXT="toto"
+function suffix_toto {
+    local __CHEMIN="${1}" __RESULT
+    __RESULT="${__CHEMIN}_${TEXT}"
+    return "${__RESULT}"
+----
+
+=== Valeur de retour vs code retour
+
+function
+print
+return
+exit
+
+=== Pièges
+
 utiliser ${AZE} plutôt que $AZE à cause de ce qui suit
+
+=== Personalisation
+
+variables par défaut en début de script
+surcharge des variables par défaut
+getopts ou source
+
+
 
 aucun élément ne doit être hard-codé
 
